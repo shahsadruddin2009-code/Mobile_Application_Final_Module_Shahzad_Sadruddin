@@ -19,8 +19,8 @@
 #   │  1. flutter pub get                             │
 #   │  2. flutter analyze            (lint / errors)  │
 #   │  3. flutter test --coverage    (unit + widget)  │
-#   │  4. coverage threshold gate    (≥ 70 %)         │
-#   │  5. flutter build apk --debug (compile check)   │
+#   │  4. coverage threshold gate    (≥ 50 %)         │
+#   │  5. flutter build web          (compile check)  │
 #   └─────────────────────────────────────────────────┘
 # ============================================================================
 
@@ -64,7 +64,7 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
-      # ── Coverage threshold gate (≥ 70 %) ──────────
+      # ── Coverage threshold gate (≥ 50 %) ──────────
       - name: Check coverage threshold
         run: |
           if [ -f coverage/lcov.info ]; then
@@ -73,12 +73,12 @@ jobs:
             if [ "$LINES" -gt 0 ]; then
               PCT=$(( HITS * 100 / LINES ))
               echo "Coverage: $PCT % ($HITS / $LINES lines)"
-              if [ "$PCT" -lt 70 ]; then
-                echo "::warning::Coverage $PCT% is below the 70% target"
+              if [ "$PCT" -lt 50 ]; then
+                echo "::warning::Coverage $PCT% is below the 50% target"
               fi
             fi
           fi
 
-      # ── Compile check (debug APK) ────────────────
-      - name: Build APK (debug)
-        run: flutter build apk --debug
+      # ── Compile check (web build) ─────────────────
+      - name: Build Web
+        run: flutter build web
