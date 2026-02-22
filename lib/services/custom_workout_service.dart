@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Custom Workout Service
+// MUSCLE POWER - Custom Workout Service
 // ============================================================================
 //
 // File: custom_workout_service.dart

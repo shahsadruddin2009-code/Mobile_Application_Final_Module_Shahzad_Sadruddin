@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Landing Screen
+// MUSCLE POWER - Landing Screen
 // ============================================================================
 // 
 // File: landing_screen.dart
@@ -7,7 +7,7 @@
 // 
 // Purpose:
 // This is the first screen users see when launching the app.
-// It showcases the Iron Forge brand with animations and provides
+// It showcases the MUSCLE POWER brand with animations and provides
 // navigation options for authentication or guest access.
 // 
 // Features:

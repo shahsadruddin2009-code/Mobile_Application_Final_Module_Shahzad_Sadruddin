@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Exercise Illustration Widget
+// MUSCLE POWER - Exercise Illustration Widget
 // ============================================================================
 //
 // File: exercise_illustration.dart
@@ -17,7 +17,7 @@
 // Supported Exercises:
 //
 // Chest:
-// - Bench Press, Incline Press, Cable Flyes, Push-Ups, Dips
+// - Bench Press, Incline Press, Cable Flyes, Push-Ups, Dips, Incline Cable Fly
 //
 // Back:
 // - Deadlift, Pull-Ups, Barbell Rows, Lat Pulldown
@@ -159,6 +159,13 @@ class _ExerciseIllustrationState extends State<ExerciseIllustration>
     } else if (exerciseKey.contains('incline') &&
         exerciseKey.contains('press')) {
       return InclinePressPainter(
+        progress: _animation.value,
+        primaryColor: widget.primaryColor,
+        secondaryColor: widget.secondaryColor,
+      );
+    } else if (exerciseKey.contains('incline') &&
+        (exerciseKey.contains('cable') || exerciseKey.contains('fly'))) {
+      return InclineCableFlyPainter(
         progress: _animation.value,
         primaryColor: widget.primaryColor,
         secondaryColor: widget.secondaryColor,
@@ -2035,7 +2042,7 @@ class BenchPressPainter extends ExercisePainterBase {
       Offset(centerX - 75 * scale, barbellY),
       Offset(centerX + 75 * scale, barbellY),
       Paint()
-        ..color = Colors.grey[400]!
+        ..color = Colors.grey[300]!
         ..strokeWidth = barThickness
         ..strokeCap = StrokeCap.round,
     );
@@ -2415,9 +2422,9 @@ class CableFlyePainter extends ExercisePainterBase {
 
     // Pulleys at top
     canvas.drawCircle(
-        Offset(17, 25), 8 * scale, Paint()..color = Colors.grey[400]!);
+        Offset(17, 25), 8 * scale, Paint()..color = Colors.grey[300]!);
     canvas.drawCircle(Offset(size.width - 17, 25), 8 * scale,
-        Paint()..color = Colors.grey[400]!);
+        Paint()..color = Colors.grey[300]!);
 
     // Head with detailed features
     drawCompleteHead(canvas, Offset(centerX, centerY - 50 * scale), scale,
@@ -2496,6 +2503,447 @@ class CableFlyePainter extends ExercisePainterBase {
         gripping: true);
     drawCompleteHand(canvas, Offset(centerX + armSpread, handY), 5 * scale, 0,
         gripping: true);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
+// ==================== INCLINE CABLE FLY ====================
+
+class InclineCableFlyPainter extends ExercisePainterBase {
+  InclineCableFlyPainter({
+    required super.progress,
+    required super.primaryColor,
+    required super.secondaryColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    final scale = size.width / 200;
+
+    // === GYM FLOOR ===
+    final floorY = centerY + 85 * scale;
+    canvas.drawRect(
+      Rect.fromLTWH(0, floorY, size.width, 20 * scale),
+      Paint()..color = Colors.grey[900]!,
+    );
+
+    // Floor line highlight
+    canvas.drawLine(
+      Offset(0, floorY),
+      Offset(size.width, floorY),
+      Paint()
+        ..color = Colors.grey[700]!
+        ..strokeWidth = 1.5 * scale,
+    );
+
+    // ============================================================
+    // CABLE TOWERS (left and right, behind everything)
+    // ============================================================
+    final towerWidth = 14 * scale;
+    const towerLeftX = 4.0;
+    final towerRightX = size.width - 4 - towerWidth;
+
+    // Left tower frame
+    final towerGrad = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Colors.grey[800]!, Colors.grey[600]!, Colors.grey[800]!],
+      ).createShader(
+          Rect.fromLTWH(towerLeftX, 5, towerWidth, floorY - 5));
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(towerLeftX, 5, towerWidth, floorY - 5),
+        Radius.circular(2 * scale),
+      ),
+      towerGrad,
+    );
+
+    // Right tower frame
+    final towerGradR = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Colors.grey[800]!, Colors.grey[600]!, Colors.grey[800]!],
+      ).createShader(
+          Rect.fromLTWH(towerRightX, 5, towerWidth, floorY - 5));
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(towerRightX, 5, towerWidth, floorY - 5),
+        Radius.circular(2 * scale),
+      ),
+      towerGradR,
+    );
+
+    // Weight stacks on each tower
+    for (int i = 0; i < 7; i++) {
+      final stackY = 14.0 + i * 10 * scale;
+      // Left
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+              towerLeftX + 1.5, stackY, towerWidth - 3, 8 * scale),
+          Radius.circular(1 * scale),
+        ),
+        Paint()..color = Colors.grey[850] ?? Colors.grey[900]!,
+      );
+      canvas.drawLine(
+        Offset(towerLeftX + 3, stackY + 1.5),
+        Offset(towerLeftX + towerWidth - 3, stackY + 1.5),
+        Paint()
+          ..color = Colors.grey[500]!
+          ..strokeWidth = 0.8 * scale,
+      );
+      // Right
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+              towerRightX + 1.5, stackY, towerWidth - 3, 8 * scale),
+          Radius.circular(1 * scale),
+        ),
+        Paint()..color = Colors.grey[850] ?? Colors.grey[900]!,
+      );
+      canvas.drawLine(
+        Offset(towerRightX + 3, stackY + 1.5),
+        Offset(towerRightX + towerWidth - 3, stackY + 1.5),
+        Paint()
+          ..color = Colors.grey[500]!
+          ..strokeWidth = 0.8 * scale,
+      );
+    }
+
+    // Pulleys at BOTTOM of towers (low cable for incline fly)
+    final pulleyLeftX = towerLeftX + towerWidth / 2;
+    final pulleyRightX = towerRightX + towerWidth / 2;
+    final pulleyY = floorY - 10 * scale;
+
+    // Left pulley
+    canvas.drawCircle(Offset(pulleyLeftX, pulleyY), 7 * scale,
+        Paint()..color = Colors.grey[400]!);
+    canvas.drawCircle(Offset(pulleyLeftX, pulleyY), 5 * scale,
+        Paint()..color = Colors.grey[600]!);
+    canvas.drawCircle(Offset(pulleyLeftX, pulleyY), 2 * scale,
+        Paint()..color = Colors.grey[300]!);
+
+    // Right pulley
+    canvas.drawCircle(Offset(pulleyRightX, pulleyY), 7 * scale,
+        Paint()..color = Colors.grey[400]!);
+    canvas.drawCircle(Offset(pulleyRightX, pulleyY), 5 * scale,
+        Paint()..color = Colors.grey[600]!);
+    canvas.drawCircle(Offset(pulleyRightX, pulleyY), 2 * scale,
+        Paint()..color = Colors.grey[300]!);
+
+    // ============================================================
+    // INCLINE BENCH (front-facing / from-feet perspective)
+    // same style as BenchPressPainter but inclined
+    // ============================================================
+    final benchTopY = centerY + 5 * scale; // Far end (head rests here)
+    final benchBottomY = centerY + 48 * scale; // Close end (seat)
+
+    // Back pad - perspective trapezoid (narrower at top, wider at bottom)
+    final padPath = Path();
+    padPath.moveTo(centerX - 16 * scale, benchTopY);
+    padPath.lineTo(centerX + 16 * scale, benchTopY);
+    padPath.lineTo(centerX + 24 * scale, benchBottomY - 14 * scale);
+    padPath.lineTo(centerX - 24 * scale, benchBottomY - 14 * scale);
+    padPath.close();
+    canvas.drawPath(padPath, Paint()..color = const Color(0xFF8B0000));
+
+    // Pad highlight
+    final padHighlight = Path();
+    padHighlight.moveTo(centerX - 10 * scale, benchTopY + 4 * scale);
+    padHighlight.lineTo(centerX + 10 * scale, benchTopY + 4 * scale);
+    padHighlight.lineTo(centerX + 17 * scale, benchBottomY - 18 * scale);
+    padHighlight.lineTo(centerX - 17 * scale, benchBottomY - 18 * scale);
+    padHighlight.close();
+    canvas.drawPath(padHighlight, Paint()..color = const Color(0xFFAA2525));
+
+    // Seat pad (wider horizontal strip)
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(centerX - 26 * scale, benchBottomY - 14 * scale,
+            52 * scale, 14 * scale),
+        Radius.circular(2 * scale),
+      ),
+      Paint()..color = const Color(0xFF6B0000),
+    );
+
+    // Front edge of bench
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+            centerX - 28 * scale, benchBottomY, 56 * scale, 5 * scale),
+        Radius.circular(2 * scale),
+      ),
+      Paint()..color = const Color(0xFF5A0000),
+    );
+
+    // Bench legs
+    canvas.drawRect(
+      Rect.fromLTWH(centerX - 24 * scale, benchBottomY + 3 * scale,
+          5 * scale, floorY - benchBottomY - 3 * scale),
+      Paint()..color = Colors.grey[600]!,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(centerX + 19 * scale, benchBottomY + 3 * scale,
+          5 * scale, floorY - benchBottomY - 3 * scale),
+      Paint()..color = Colors.grey[600]!,
+    );
+
+    // Incline indicator — small angular support behind pad
+    canvas.drawLine(
+      Offset(centerX - 18 * scale, benchTopY + 2 * scale),
+      Offset(centerX - 22 * scale, benchBottomY - 16 * scale),
+      Paint()
+        ..color = Colors.grey[600]!
+        ..strokeWidth = 4 * scale
+        ..strokeCap = StrokeCap.round,
+    );
+    canvas.drawLine(
+      Offset(centerX + 18 * scale, benchTopY + 2 * scale),
+      Offset(centerX + 22 * scale, benchBottomY - 16 * scale),
+      Paint()
+        ..color = Colors.grey[600]!
+        ..strokeWidth = 4 * scale
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // ============================================================
+    // MAN LYING ON INCLINE BENCH (front / from-feet view)
+    // ============================================================
+
+    // --- HEAD at far end (small due to perspective / incline) ---
+    final headY = benchTopY - 8 * scale;
+    canvas.drawOval(
+      Rect.fromCenter(
+          center: Offset(centerX, headY),
+          width: 16 * scale,
+          height: 18 * scale),
+      Paint()..color = skinColor,
+    );
+    // Hair
+    canvas.drawArc(
+      Rect.fromCenter(
+          center: Offset(centerX, headY - 5 * scale),
+          width: 16 * scale,
+          height: 10 * scale),
+      math.pi,
+      math.pi,
+      true,
+      Paint()..color = const Color(0xFF2C1810),
+    );
+    // Eyes looking up at hands
+    canvas.drawCircle(Offset(centerX - 3 * scale, headY - 1 * scale),
+        1.5 * scale, Paint()..color = Colors.white);
+    canvas.drawCircle(Offset(centerX + 3 * scale, headY - 1 * scale),
+        1.5 * scale, Paint()..color = Colors.white);
+    canvas.drawCircle(Offset(centerX - 3 * scale, headY - 2 * scale),
+        0.8 * scale, Paint()..color = Colors.brown[800]!);
+    canvas.drawCircle(Offset(centerX + 3 * scale, headY - 2 * scale),
+        0.8 * scale, Paint()..color = Colors.brown[800]!);
+    // Mouth
+    canvas.drawArc(
+      Rect.fromCenter(
+          center: Offset(centerX, headY + 4 * scale),
+          width: 5 * scale,
+          height: 3 * scale),
+      0,
+      math.pi,
+      false,
+      Paint()
+        ..color = const Color(0xFF8B6550)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8 * scale,
+    );
+
+    // --- SHOULDERS (visible on either side of bench) ---
+    final shoulderY = benchTopY + 10 * scale;
+    // Left shoulder (skin deltoid)
+    canvas.drawOval(
+      Rect.fromCenter(
+          center: Offset(centerX - 22 * scale, shoulderY),
+          width: 18 * scale,
+          height: 14 * scale),
+      Paint()..color = skinColor,
+    );
+    // Right shoulder
+    canvas.drawOval(
+      Rect.fromCenter(
+          center: Offset(centerX + 22 * scale, shoulderY),
+          width: 18 * scale,
+          height: 14 * scale),
+      Paint()..color = skinColor,
+    );
+
+    // --- CHEST / TORSO (foreshortened on bench) ---
+    final chestY = benchTopY + 18 * scale;
+    // Tank top body
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+            center: Offset(centerX, chestY + 8 * scale),
+            width: 44 * scale,
+            height: 28 * scale),
+        Radius.circular(6 * scale),
+      ),
+      Paint()..color = const Color(0xFF1A1A2E),
+    );
+
+    // Upper pecs visible above tank top neckline
+    canvas.drawOval(
+      Rect.fromCenter(
+          center: Offset(centerX - 12 * scale, chestY),
+          width: 20 * scale,
+          height: 14 * scale),
+      Paint()..color = skinColor,
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+          center: Offset(centerX + 12 * scale, chestY),
+          width: 20 * scale,
+          height: 14 * scale),
+      Paint()..color = skinColor,
+    );
+
+    // Chest muscle highlights (glow when squeezed)
+    drawMuscleHighlight(
+        canvas,
+        Offset(centerX - 12 * scale, chestY),
+        14 * scale * (0.7 + progress * 0.4),
+        primaryColor);
+    drawMuscleHighlight(
+        canvas,
+        Offset(centerX + 12 * scale, chestY),
+        14 * scale * (0.7 + progress * 0.4),
+        primaryColor);
+
+    // --- HIPS / GYM SHORTS ---
+    final hipY = benchBottomY - 10 * scale;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+            center: Offset(centerX, hipY),
+            width: 40 * scale,
+            height: 16 * scale),
+        Radius.circular(4 * scale),
+      ),
+      Paint()..color = const Color(0xFF2D3436),
+    );
+
+    // --- LEGS (going down from bench, FEET FLAT ON FLOOR) ---
+    final legStartY = benchBottomY;
+
+    // Left thigh
+    canvas.drawLine(
+      Offset(centerX - 12 * scale, legStartY),
+      Offset(centerX - 18 * scale, legStartY + 18 * scale),
+      Paint()
+        ..color = skinColor
+        ..strokeWidth = 14 * scale
+        ..strokeCap = StrokeCap.round,
+    );
+    // Left calf going to floor
+    canvas.drawLine(
+      Offset(centerX - 18 * scale, legStartY + 18 * scale),
+      Offset(centerX - 16 * scale, floorY - 8 * scale),
+      Paint()
+        ..color = skinColor
+        ..strokeWidth = 12 * scale
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Right thigh
+    canvas.drawLine(
+      Offset(centerX + 12 * scale, legStartY),
+      Offset(centerX + 18 * scale, legStartY + 18 * scale),
+      Paint()
+        ..color = skinColor
+        ..strokeWidth = 14 * scale
+        ..strokeCap = StrokeCap.round,
+    );
+    // Right calf going to floor
+    canvas.drawLine(
+      Offset(centerX + 18 * scale, legStartY + 18 * scale),
+      Offset(centerX + 16 * scale, floorY - 8 * scale),
+      Paint()
+        ..color = skinColor
+        ..strokeWidth = 12 * scale
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Feet flat on floor (front-facing shoe ovals)
+    drawGymShoe(
+        canvas,
+        Offset(centerX - 16 * scale, floorY - 8 * scale),
+        Offset(centerX - 26 * scale, floorY - 1 * scale),
+        7 * scale);
+    drawGymShoe(
+        canvas,
+        Offset(centerX + 16 * scale, floorY - 8 * scale),
+        Offset(centerX + 26 * scale, floorY - 1 * scale),
+        7 * scale);
+
+    // ============================================================
+    // ARMS & FLY MOTION
+    // progress 0 = arms wide open / back (stretched)
+    // progress 1 = arms together above chest (squeezed)
+    // ============================================================
+    final armShoulderY = shoulderY;
+
+    // Arm horizontal spread: wide at start, near-zero at peak squeeze
+    final maxSpread = 70 * scale;
+    final minSpread = 6 * scale;
+    final armSpread = maxSpread - (maxSpread - minSpread) * progress;
+
+    // Arm vertical lift: hands start low behind and come up over chest
+    final handStartY = chestY + 10 * scale; // Behind/low when stretched
+    final handEndY = chestY - 40 * scale; // Above chest when squeezed
+    final handY = handStartY + (handEndY - handStartY) * progress;
+
+    // Elbows bow outward with slight bend
+    final elbowSpread = armSpread * 0.7 + 8 * scale;
+    final elbowY = (armShoulderY + handY) / 2 + 6 * scale * (1 - progress);
+
+    // LEFT ARM-------
+    final leftShoulderPt = Offset(centerX - 22 * scale, armShoulderY);
+    final leftElbow = Offset(centerX - elbowSpread, elbowY);
+    final leftHand = Offset(centerX - armSpread, handY);
+
+    drawMuscularArm(canvas, leftShoulderPt, leftElbow, leftHand,
+        9 * scale, 0.3 + progress * 0.5);
+
+    // RIGHT ARM-------
+    final rightShoulderPt = Offset(centerX + 22 * scale, armShoulderY);
+    final rightElbow = Offset(centerX + elbowSpread, elbowY);
+    final rightHand = Offset(centerX + armSpread, handY);
+
+    drawMuscularArm(canvas, rightShoulderPt, rightElbow, rightHand,
+        9 * scale, 0.3 + progress * 0.5);
+
+    // ============================================================
+    // CABLES from low pulleys up to the hands
+    // ============================================================
+    drawCable(canvas, Offset(pulleyLeftX, pulleyY), leftHand, 2 * scale);
+    drawCable(canvas, Offset(pulleyRightX, pulleyY), rightHand, 2 * scale);
+
+    // CABLE HANDLES in hands
+    final leftAngle = math.atan2(
+        leftHand.dy - leftElbow.dy, leftHand.dx - leftElbow.dx);
+    final rightAngle = math.atan2(
+        rightHand.dy - rightElbow.dy, rightHand.dx - rightElbow.dx);
+
+    drawCableHandle(canvas, leftHand, 5 * scale, leftAngle + math.pi / 2);
+    drawCableHandle(canvas, rightHand, 5 * scale, rightAngle + math.pi / 2);
+
+    // Hands gripping handles
+    drawCompleteHand(
+        canvas, leftHand, 5 * scale, leftAngle, gripping: true);
+    drawCompleteHand(
+        canvas, rightHand, 5 * scale, rightAngle, gripping: true);
   }
 
   @override
@@ -2804,7 +3252,7 @@ class DipsPainter extends ExercisePainterBase {
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Colors.grey[400]!, Colors.grey[600]!, Colors.grey[400]!],
+        colors: [Colors.grey[300]!, Colors.grey[600]!, Colors.grey[300]!],
       ).createShader(Rect.fromLTWH(
           centerX - 43 * scale, centerY - 10 * scale, 6 * scale, 70 * scale))
       ..strokeWidth = 6 * scale
@@ -3233,7 +3681,7 @@ class PullUpPainter extends ExercisePainterBase {
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Colors.grey[400]!, Colors.grey[600]!, Colors.grey[400]!],
+        colors: [Colors.grey[300]!, Colors.grey[600]!, Colors.grey[300]!],
       ).createShader(Rect.fromLTWH(
           centerX - 65 * scale, barY - 4 * scale, 130 * scale, 8 * scale))
       ..strokeWidth = 7 * scale
@@ -3626,7 +4074,7 @@ class LatPulldownPainter extends ExercisePainterBase {
       ..shader = LinearGradient(
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
-        colors: [Colors.grey[700]!, Colors.grey[400]!, Colors.grey[600]!],
+        colors: [Colors.grey[700]!, Colors.grey[300]!, Colors.grey[600]!],
       ).createShader(
           Rect.fromLTWH(centerX - 50 * scale, 0, 100 * scale, centerY));
 
@@ -4762,7 +5210,7 @@ class TricepPushdownPainter extends ExercisePainterBase {
       ..shader = LinearGradient(
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
-        colors: [Colors.grey[700]!, Colors.grey[400]!, Colors.grey[600]!],
+        colors: [Colors.grey[700]!, Colors.grey[300]!, Colors.grey[600]!],
       ).createShader(Rect.fromLTWH(
           centerX - 10 * scale, 0, 20 * scale, centerY - 40 * scale));
 
@@ -5304,7 +5752,7 @@ class LegPressPainter extends ExercisePainterBase {
       ..shader = LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Colors.grey[600]!, Colors.grey[400]!, Colors.grey[500]!],
+        colors: [Colors.grey[600]!, Colors.grey[300]!, Colors.grey[500]!],
       ).createShader(Rect.fromLTWH(centerX - 60 * scale, centerY - 60 * scale,
           130 * scale, 130 * scale));
 
@@ -5756,7 +6204,7 @@ class LegCurlPainter extends ExercisePainterBase {
       ..shader = LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Colors.grey[600]!, Colors.grey[400]!, Colors.grey[500]!],
+        colors: [Colors.grey[600]!, Colors.grey[300]!, Colors.grey[500]!],
       ).createShader(Rect.fromLTWH(centerX - 70 * scale, centerY - 40 * scale,
           140 * scale, 100 * scale));
 
@@ -5802,7 +6250,7 @@ class LegCurlPainter extends ExercisePainterBase {
       Offset(centerX + 75 * scale, centerY - 35 * scale),
       Offset(centerX + 75 * scale, centerY + 35 * scale),
       Paint()
-        ..color = Colors.grey[400]!
+        ..color = Colors.grey[300]!
         ..strokeWidth = 2 * scale,
     );
 
@@ -6168,7 +6616,7 @@ class LegExtensionPainter extends ExercisePainterBase {
     canvas.drawCircle(Offset(footX, footY + 5 * scale), 7 * scale,
         Paint()..color = Colors.grey[600]!);
     canvas.drawCircle(Offset(footX, footY + 5 * scale), 4 * scale,
-        Paint()..color = Colors.grey[400]!);
+        Paint()..color = Colors.grey[300]!);
 
     // Gym shoe
     drawGymShoe(canvas, Offset(footX, footY),

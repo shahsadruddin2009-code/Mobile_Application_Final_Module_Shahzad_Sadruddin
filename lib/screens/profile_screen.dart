@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Profile Screen
+// MUSCLE POWER - Profile Screen
 // ============================================================================
 //
 // File: profile_screen.dart
@@ -50,6 +50,8 @@ import '../services/progress_service.dart';
 import '../services/exercise_log_service.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import '../data/data_service.dart';
+import 'test_statistics_screen.dart';
+import 'privacy_screen.dart';
 
 /// User profile and settings screen
 ///
@@ -265,7 +267,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 8),
           Text('Goal: ${user.fitnessGoal}',
-              style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+              style: TextStyle(color: Colors.grey[300], fontSize: 14)),
         ],
       ),
     );
@@ -293,7 +295,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.bold)),
-          Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+          Text(label, style: TextStyle(color: Colors.grey[300], fontSize: 12)),
         ],
       ),
     );
@@ -327,7 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: Colors.white)),
             const SizedBox(height: 16),
             Text('Set your weight goals to track your progress!',
-                style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+                style: TextStyle(color: Colors.grey[300], fontSize: 14)),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
@@ -409,7 +411,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('Current',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    style: TextStyle(color: Colors.grey[300], fontSize: 12)),
                 Text('${currentWeight.toStringAsFixed(1)} kg',
                     style: const TextStyle(
                         color: Colors.white,
@@ -418,7 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ]),
               Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
                 Text('Start',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    style: TextStyle(color: Colors.grey[300], fontSize: 12)),
                 Text('${startWeight.toStringAsFixed(1)} kg',
                     style: TextStyle(
                         color: Colors.grey[300],
@@ -427,7 +429,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ]),
               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                 Text('Target',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    style: TextStyle(color: Colors.grey[300], fontSize: 12)),
                 Text('${targetWeight.toStringAsFixed(1)} kg',
                     style: const TextStyle(
                         color: Color(0xFFFF6B35),
@@ -448,7 +450,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               animationDuration: 1500),
           const SizedBox(height: 8),
           Text('${(progress.clamp(0, 1) * 100).toInt()}% achieved!',
-              style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+              style: TextStyle(color: Colors.grey[300], fontSize: 12)),
         ],
       ),
     );
@@ -528,7 +530,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: valueColor?.withOpacity(0.8) ?? Colors.grey[500],
               fontSize: 12)),
       const SizedBox(height: 4),
-      Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+      Text(label, style: TextStyle(color: Colors.grey[300], fontSize: 14)),
     ]);
   }
 
@@ -581,7 +583,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.white)),
                 const SizedBox(height: 8),
                 Text('These stats are synced with your Progress page',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+                    style: TextStyle(color: Colors.grey[300], fontSize: 14)),
                 const SizedBox(height: 24),
                 TextField(
                     controller: ageController,
@@ -646,7 +648,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.white)),
                 const SizedBox(height: 8),
                 Text('Set your starting and target weight for goal tracking',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    style: TextStyle(color: Colors.grey[300], fontSize: 12)),
                 const SizedBox(height: 12),
                 Row(children: [
                   Expanded(
@@ -746,7 +748,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontWeight: FontWeight.bold,
                     color: Colors.white)),
             Text('${user.achievements.length} earned',
-                style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                style: TextStyle(color: Colors.grey[300], fontSize: 12)),
           ]),
           const SizedBox(height: 16),
           Wrap(
@@ -836,7 +838,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
               subtitle: 'Data & permissions',
               trailing: const Icon(Icons.arrow_forward_ios,
                   color: Colors.grey, size: 16),
-              onTap: () {}),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PrivacyScreen(),
+                  ),
+                );
+              }),
+          _buildSettingItem(
+              icon: Icons.bar_chart_outlined,
+              title: 'Test Statistics',
+              subtitle: 'QA coverage & results',
+              trailing: const Icon(Icons.arrow_forward_ios,
+                  color: Colors.grey, size: 16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const TestStatisticsScreen(),
+                  ),
+                );
+              }),
+          _buildSettingItem(
+              icon: Icons.speed_outlined,
+              title: 'Performance & Health',
+              subtitle: 'Metrics, SLOs & alerts',
+              trailing: const Icon(Icons.arrow_forward_ios,
+                  color: Colors.grey, size: 16),
+              onTap: () {
+                Navigator.pushNamed(context, '/performance');
+              }),
+          _buildSettingItem(
+              icon: Icons.feedback_outlined,
+              title: 'Feedback & Support',
+              subtitle: 'Bug reports, feature requests & NPS',
+              trailing: const Icon(Icons.arrow_forward_ios,
+                  color: Colors.grey, size: 16),
+              onTap: () {
+                Navigator.pushNamed(context, '/feedback');
+              }),
         ],
       ),
     );
@@ -920,7 +961,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           TextButton(
                               onPressed: () => Navigator.pop(ctx, false),
                               child: Text('Cancel',
-                                  style: TextStyle(color: Colors.grey[400]))),
+                                  style: TextStyle(color: Colors.grey[300]))),
                           ElevatedButton(
                               onPressed: () => Navigator.pop(ctx, true),
                               style: ElevatedButton.styleFrom(
@@ -938,7 +979,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           icon: const Icon(Icons.logout),
           label: const Text('Sign Out'),
           style: TextButton.styleFrom(
-              foregroundColor: Colors.grey[400],
+              foregroundColor: Colors.grey[300],
               padding: const EdgeInsets.symmetric(vertical: 16)),
         ),
       ),

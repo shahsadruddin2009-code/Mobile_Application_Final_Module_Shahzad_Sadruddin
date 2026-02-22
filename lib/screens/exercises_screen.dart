@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Exercise Library Screen
+// MUSCLE POWER - Exercise Library Screen
 // ============================================================================
 //
 // File: exercises_screen.dart
@@ -40,6 +40,7 @@ import 'package:flutter/material.dart';
 import '../data/data_service.dart';
 import '../models/models.dart';
 import '../widgets/exercise_illustration.dart';
+import '../widgets/responsive_helper.dart';
 import 'exercise_detail_screen.dart';
 
 /// Exercise library browsing screen
@@ -109,7 +110,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                     '${exercises.length} exercises available',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[400],
+                      color: Colors.grey[300],
                     ),
                   ),
                 ],
@@ -226,7 +227,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                             muscle['name'],
                             style: TextStyle(
                               color:
-                                  isSelected ? Colors.white : Colors.grey[400],
+                                  isSelected ? Colors.white : Colors.grey[300],
                               fontSize: 12,
                               fontWeight: isSelected
                                   ? FontWeight.bold
@@ -249,7 +250,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
               child: Text(
                 '${filteredExercises.length} exercises found',
                 style: TextStyle(
-                  color: Colors.grey[400],
+                  color: Colors.grey[300],
                   fontSize: 14,
                 ),
               ),
@@ -284,11 +285,11 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                       padding: const EdgeInsets.all(20),
                       physics: const BouncingScrollPhysics(),
                       gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: ResponsiveHelper.of(context).gridColumns,
                         childAspectRatio: 0.85,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
+                        crossAxisSpacing: ResponsiveHelper.of(context).gridSpacing,
+                        mainAxisSpacing: ResponsiveHelper.of(context).gridSpacing,
                       ),
                       itemCount: filteredExercises.length,
                       itemBuilder: (context, index) {
@@ -323,7 +324,10 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
     final gradientColors =
         colors[exercise.muscleGroup] ?? [const Color(0xFFFF6B35), const Color(0xFFFF8E53)];
 
-    return GestureDetector(
+    return Semantics(
+      label: '${exercise.name}, ${exercise.muscleGroup} exercise, ${exercise.sets} sets of ${exercise.reps} reps',
+      button: true,
+      child: GestureDetector(
       onTap: () {
         Navigator.push(
           context,
@@ -445,13 +449,13 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                       Icon(
                         Icons.repeat,
                         size: 14,
-                        color: Colors.grey[400],
+                        color: Colors.grey[300],
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '${exercise.sets} x ${exercise.reps}',
                         style: TextStyle(
-                          color: Colors.grey[400],
+                          color: Colors.grey[300],
                           fontSize: 12,
                         ),
                       ),
@@ -475,6 +479,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

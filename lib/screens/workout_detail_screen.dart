@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Workout Detail Screen
+// MUSCLE POWER - Workout Detail Screen
 // ============================================================================
 //
 // File: workout_detail_screen.dart
@@ -403,7 +403,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen>
                   Text(
                     '${widget.workout.exercises.length} exercises',
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: Colors.grey[300],
                       fontSize: 14,
                     ),
                   ),
@@ -502,7 +502,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen>
                                   Text(
                                     '${exercise.reps} reps • ${exercise.restTime} rest',
                                     style: TextStyle(
-                                      color: Colors.grey[400],
+                                      color: Colors.grey[300],
                                       fontSize: 12,
                                     ),
                                   ),
@@ -740,7 +740,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen>
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[400],
+            color: Colors.grey[300],
             fontSize: 12,
           ),
         ),
@@ -813,7 +813,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen>
                   'Great job! You crushed ${widget.workout.name}!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.grey[400],
+                    color: Colors.grey[300],
                     fontSize: 14,
                   ),
                 ),
@@ -883,7 +883,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen>
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[400],
+            color: Colors.grey[300],
             fontSize: 12,
           ),
         ),

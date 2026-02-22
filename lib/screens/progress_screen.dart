@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Progress Tracking Screen
+// MUSCLE POWER - Progress Tracking Screen
 // ============================================================================
 //
 // File: progress_screen.dart
@@ -52,6 +52,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../services/progress_service.dart';
 import '../services/exercise_log_service.dart';
+import '../services/nutrition_service.dart';
 
 /// Progress tracking screen with charts and analytics
 ///
@@ -75,6 +76,7 @@ class _ProgressScreenState extends State<ProgressScreen>
   late TabController _tabController;
   final ProgressService _progressService = ProgressService();
   final ExerciseLogService _exerciseLogService = ExerciseLogService();
+  final NutritionService _nutritionService = NutritionService();
 
   String? _selectedExercise;
 
@@ -88,11 +90,38 @@ class _ProgressScreenState extends State<ProgressScreen>
   Future<void> _initServices() async {
     await _progressService.init();
     await _exerciseLogService.init();
+    await _nutritionService.init();
     final exercises = _exerciseLogService.getLoggedExerciseNames();
     if (exercises.isNotEmpty && _selectedExercise == null) {
       _selectedExercise = exercises.first;
     }
     if (mounted) setState(() {});
+  }
+
+  /// Get daily calorie statistics for a specific date
+  Map<String, int> _getDailyCalorieStats(DateTime date) {
+    // Get calories intake from meals
+    final mealsOnDate = _nutritionService.mealLogs.where((m) =>
+        m.loggedAt.year == date.year &&
+        m.loggedAt.month == date.month &&
+        m.loggedAt.day == date.day);
+    final caloriesIntake = mealsOnDate.fold<int>(0, (sum, m) => sum + m.calories);
+
+    // Get calories burned from exercises
+    final exercisesOnDate = _exerciseLogService.entries.where((e) =>
+        e.date.year == date.year &&
+        e.date.month == date.month &&
+        e.date.day == date.day);
+    final userWeight = _progressService.userStats.weight ?? 70.0;
+    final totalSets = exercisesOnDate.fold<int>(0, (sum, e) => sum + e.sets);
+    final durationHours = (totalSets * 2) / 60.0;
+    final caloriesBurned = (5.0 * userWeight * durationHours).round();
+
+    return {
+      'intake': caloriesIntake,
+      'burned': caloriesBurned,
+      'net': caloriesIntake - caloriesBurned,
+    };
   }
 
   @override
@@ -122,18 +151,36 @@ class _ProgressScreenState extends State<ProgressScreen>
                               color: Colors.white)),
                       SizedBox(height: 4),
                       Text('Track your fitness journey',
-                          style: TextStyle(color: Colors.grey, fontSize: 14)),
+                          style: TextStyle(color: Color(0xFFB0B0B0), fontSize: 14)),
                     ],
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                            colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)]),
-                        borderRadius: BorderRadius.circular(15)),
-                    child: IconButton(
-                        onPressed: () => _showAddProgressDialog(context),
-                        icon: const Icon(Icons.add),
-                        color: Colors.white),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                                colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)]),
+                            borderRadius: BorderRadius.circular(15)),
+                        child: IconButton(
+                            onPressed: () => _showAddProgressDialog(context),
+                            icon: const Icon(Icons.add),
+                            color: Colors.white,
+                            tooltip: 'Add progress entry'),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        decoration: BoxDecoration(
+                            color: const Color(0xFF1A1A2E),
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                                color: const Color(0xFFFF6B35).withOpacity(0.3))),
+                        child: IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.arrow_back),
+                            color: Colors.white,
+                            tooltip: 'Go back'),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -150,7 +197,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                         colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)]),
                     borderRadius: BorderRadius.circular(12)),
                 labelColor: Colors.white,
-                unselectedLabelColor: Colors.grey,
+                unselectedLabelColor: const Color(0xFFB0B0B0),
                 labelStyle:
                     const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                 unselectedLabelStyle: const TextStyle(fontSize: 11),
@@ -258,6 +305,8 @@ class _ProgressScreenState extends State<ProgressScreen>
           const SizedBox(height: 20),
           _buildCurrentProgressCard(),
           const SizedBox(height: 20),
+          _buildDailyCaloriesCard(),
+          const SizedBox(height: 20),
           const Text('Recent Entries',
               style: TextStyle(
                   fontSize: 18,
@@ -308,7 +357,7 @@ class _ProgressScreenState extends State<ProgressScreen>
         const SizedBox(height: 8),
         Text(unit,
             style: TextStyle(color: color.withOpacity(0.8), fontSize: 11)),
-        Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+        Text(label, style: TextStyle(color: Colors.grey[300], fontSize: 12)),
       ],
     );
   }
@@ -374,6 +423,228 @@ class _ProgressScreenState extends State<ProgressScreen>
               style: TextStyle(
                   color: color, fontSize: 18, fontWeight: FontWeight.bold)),
           Text(label, style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+        ],
+      ),
+    );
+  }
+
+  /// Daily Calorie Statistics Card showing intake, burned, and net calories
+  Widget _buildDailyCaloriesCard() {
+    final today = DateTime.now();
+    final stats = _getDailyCalorieStats(today);
+    final caloriesIntake = stats['intake']!;
+    final caloriesBurned = stats['burned']!;
+    final netCalories = stats['net']!;
+
+    // Get last 7 days for the mini chart
+    List<Map<String, int>> weeklyStats = [];
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      weeklyStats.add(_getDailyCalorieStats(date));
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A1A2E), Color(0xFF16213E)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Daily Calories',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF6B35).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  DateFormat('MMM d').format(today),
+                  style: const TextStyle(
+                    color: Color(0xFFFF6B35),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildCalorieStatItem(
+                  'Intake',
+                  caloriesIntake,
+                  Icons.restaurant,
+                  const Color(0xFF4CAF50),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildCalorieStatItem(
+                  'Burned',
+                  caloriesBurned,
+                  Icons.local_fire_department,
+                  const Color(0xFFFF6B35),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildCalorieStatItem(
+                  'Net',
+                  netCalories,
+                  Icons.balance,
+                  netCalories >= 0 ? const Color(0xFF00D9FF) : const Color(0xFFE74C3C),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Weekly Overview',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 80,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: List.generate(7, (index) {
+                final dayStats = weeklyStats[index];
+                final intake = dayStats['intake']!;
+                final burned = dayStats['burned']!;
+                final date = today.subtract(Duration(days: 6 - index));
+                const maxVal = 2500; // Normalize to reasonable daily max
+                final intakeHeight = (intake / maxVal * 50).clamp(2.0, 50.0);
+                final burnedHeight = (burned / maxVal * 50).clamp(2.0, 50.0);
+
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: intakeHeight,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF4CAF50),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        Container(
+                          width: 8,
+                          height: burnedHeight,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF6B35),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat('E').format(date).substring(0, 1),
+                      style: TextStyle(
+                        color: index == 6 ? Colors.white : Colors.grey[500],
+                        fontSize: 10,
+                        fontWeight: index == 6 ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text('Intake', style: TextStyle(color: Colors.grey[300], fontSize: 10)),
+              const SizedBox(width: 16),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF6B35),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text('Burned', style: TextStyle(color: Colors.grey[300], fontSize: 10)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCalorieStatItem(String label, int value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 6),
+          Text(
+            '$value',
+            style: TextStyle(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey[500],
+              fontSize: 10,
+            ),
+          ),
+          Text(
+            'kcal',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 9,
+            ),
+          ),
         ],
       ),
     );
@@ -520,7 +791,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(DateFormat('MMM d, yyyy').format(entry.date),
-                        style: TextStyle(color: Colors.grey[400])),
+                        style: TextStyle(color: Colors.grey[300])),
                     Text('${entry.weight.toStringAsFixed(1)} kg',
                         style: const TextStyle(
                             color: Colors.white, fontWeight: FontWeight.bold)),
@@ -749,7 +1020,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Select Exercise',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    style: TextStyle(color: Colors.grey[300], fontSize: 12)),
                 const SizedBox(height: 8),
                 DropdownButton<String>(
                   value: _selectedExercise,
@@ -996,7 +1267,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                           Text(
                               '${entry.sets} sets x ${entry.reps} reps @ ${entry.weight} kg',
                               style: TextStyle(
-                                  color: Colors.grey[400], fontSize: 12)),
+                                  color: Colors.grey[300], fontSize: 12)),
                         ],
                       ),
                     ),
@@ -1072,7 +1343,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                   const SizedBox(height: 4),
                   Text(
                       '${entries.length} workouts | Max: ${maxWeight.toStringAsFixed(1)} kg',
-                      style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                      style: TextStyle(color: Colors.grey[300], fontSize: 12)),
                 ],
               ),
             ),
@@ -1120,7 +1391,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                         color: Colors.white, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text('${entry.weight.toStringAsFixed(1)} kg',
-                    style: TextStyle(color: Colors.grey[400])),
+                    style: TextStyle(color: Colors.grey[300])),
               ],
             ),
           ),

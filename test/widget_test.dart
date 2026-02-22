@@ -1,9 +1,9 @@
-﻿// ============================================================================
-// IRON FORGE - Widget Tests
+// ============================================================================
+// MUSCLE POWER - Widget Tests
 // ============================================================================
 //
 // File: widget_test.dart
-// Description: Automated widget tests for the Iron Forge app
+// Description: Automated widget tests for the MUSCLE POWER app
 //
 // Test Coverage:
 // - App initialization and loading
@@ -35,7 +35,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bodybuilding_app/main.dart';
 
-/// Main test function for Iron Forge app
+/// Main test function for MUSCLE POWER app
 ///
 /// Contains all widget tests organized by feature area.
 /// Uses Flutter's testing framework with WidgetTester.
@@ -63,12 +63,12 @@ void main() {
   /// Test: Verify sign in form validates email
   testWidgets('Sign in form validates email', (WidgetTester tester) async {
     await tester.pumpWidget(const BodybuildingApp());
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
 
     // Find email text field and enter invalid email
-    final emailField = find.byType(TextField).first;
-    if (emailField.evaluate().isNotEmpty) {
-      await tester.enterText(emailField, 'invalid-email');
+    final emailFields = find.byType(TextField);
+    if (emailFields.evaluate().isNotEmpty) {
+      await tester.enterText(emailFields.first, 'invalid-email');
       await tester.pump();
     }
 

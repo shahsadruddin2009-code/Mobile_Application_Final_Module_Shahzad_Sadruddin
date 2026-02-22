@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Statistics Card Widgets
+// MUSCLE POWER - Statistics Card Widgets
 // ============================================================================
 //
 // File: stat_card.dart
@@ -76,7 +76,9 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Semantics(
+      label: '$label: $value',
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -137,7 +139,7 @@ class StatCard extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color: Colors.grey[400],
+                    color: Colors.grey[300],
                     fontSize: 12,
                   ),
                 ),
@@ -146,6 +148,7 @@ class StatCard extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
@@ -282,7 +285,7 @@ class CircularStatCard extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.grey[400],
+              color: Colors.grey[300],
               fontSize: 12,
             ),
           ),

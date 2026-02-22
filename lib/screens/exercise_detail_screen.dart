@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Exercise Detail Screen
+// MUSCLE POWER - Exercise Detail Screen
 // ============================================================================
 //
 // File: exercise_detail_screen.dart
@@ -381,11 +381,11 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
                     Row(
                       children: [
                         Icon(Icons.sports_martial_arts,
-                            color: Colors.grey[400], size: 18),
+                            color: Colors.grey[300], size: 18),
                         const SizedBox(width: 8),
                         Text(widget.exercise.equipment,
                             style: TextStyle(
-                                color: Colors.grey[400], fontSize: 14)),
+                                color: Colors.grey[300], fontSize: 14)),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -413,7 +413,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
                               children: [
                                 Text('Workout Date',
                                     style: TextStyle(
-                                        color: Colors.grey[400], fontSize: 12)),
+                                        color: Colors.grey[300], fontSize: 12)),
                                 const SizedBox(height: 4),
                                 Text(
                                     DateFormat('EEEE, MMM d, yyyy')
@@ -652,7 +652,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
                     const SizedBox(height: 12),
                     Text(widget.exercise.description,
                         style: TextStyle(
-                            color: Colors.grey[400],
+                            color: Colors.grey[300],
                             fontSize: 14,
                             height: 1.6)),
                     const SizedBox(height: 24),
@@ -687,7 +687,7 @@ class _ExerciseDetailScreenState extends State<ExerciseDetailScreen>
                             Expanded(
                                 child: Text(entry.value,
                                     style: TextStyle(
-                                        color: Colors.grey[400],
+                                        color: Colors.grey[300],
                                         fontSize: 14,
                                         height: 1.4))),
                           ],

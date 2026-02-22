@@ -1,7 +1,10 @@
 name: bodybuilding_app
-description: A comprehensive bodybuilding and fitness tracking application.
+description: >
+  A comprehensive Flutter-based bodybuilding and fitness tracking application.
+  Features workout management, nutrition tracking, progress monitoring,
+  performance analytics, health dashboards, and user feedback systems.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -17,6 +20,8 @@ dependencies:
   sqflite: ^2.3.0
   path: ^1.8.3
   shared_preferences: ^2.2.2
+  connectivity_plus: ^6.0.3
+  http: ^1.2.1
   table_calendar: ^3.1.0
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.0
@@ -26,6 +31,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1
+  integration_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true

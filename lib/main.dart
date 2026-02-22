@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Bodybuilding & Fitness Tracking Application
+// MUSCLE POWER - Bodybuilding & Fitness Tracking Application
 // ============================================================================
 // 
 // File: main.dart
@@ -11,7 +11,7 @@
 // - Route definitions for navigation
 // - Main navigation screen with bottom navigation bar
 // 
-// Author: Iron Forge Development Team
+// Author: MUSCLE POWER Development Team
 // Version: 1.0.0
 // ============================================================================
 
@@ -25,15 +25,54 @@ import 'screens/exercises_screen.dart';
 import 'screens/progress_screen.dart';
 import 'screens/nutrition_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/performance_dashboard_screen.dart';
+import 'screens/feedback_screen.dart';
 import 'services/auth_service.dart';
+import 'services/performance_service.dart';
+import 'services/health_dashboard_service.dart';
+import 'services/feedback_service.dart';
+import 'services/app_lifecycle_observer.dart';
+import 'services/connectivity_service.dart';
+import 'services/data_lifecycle_service.dart';
+import 'services/api_client.dart';
+import 'services/cache_manager.dart';
+import 'widgets/offline_banner.dart';
 
 /// Main entry point for the application
 /// 
 /// Initializes Flutter bindings, authentication service, and validates
 /// any existing user session before launching the app.
+/// Global lifecycle observer for performance and health monitoring
+final AppLifecycleObserver appLifecycleObserver = AppLifecycleObserver();
+
 void main() async {
   // Ensure Flutter bindings are initialized before any async operations
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize the lifecycle observer to start timing cold start
+  appLifecycleObserver.initialize();
+  WidgetsBinding.instance.addObserver(appLifecycleObserver);
+
+  // Initialize monitoring services
+  final perfService = PerformanceService();
+  await perfService.init();
+  final healthService = HealthDashboardService();
+  await healthService.init();
+  final feedbackService = FeedbackService();
+  await feedbackService.init();
+
+  // Initialize connectivity monitoring for offline awareness
+  final connectivityService = ConnectivityService();
+  await connectivityService.init();
+
+  // Replay queued API requests when connectivity is restored
+  connectivityService.connectivityStream.listen((isOffline) {
+    if (!isOffline) ApiClient().replayQueue();
+  });
+
+  // Run data-retention enforcement and stale-cache eviction
+  await DataLifecycleService().enforceRetention();
+  await CacheManager().evictStale();
 
   // Initialize the authentication service singleton
   final authService = AuthService();
@@ -49,8 +88,19 @@ void main() async {
     }
   }
 
+  // Set up global error handling for crash tracking
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    appLifecycleObserver.recordCrash(details.exceptionAsString());
+  };
+
   // Launch app with appropriate initial route based on auth state
   runApp(BodybuildingApp(isLoggedIn: isValidSession));
+
+  // Record cold start completion after first frame
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    appLifecycleObserver.recordColdStartComplete();
+  });
 }
 
 /// Root widget of the application
@@ -68,7 +118,7 @@ class BodybuildingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Iron Man Muscle - Bodybuilding',
+      title: 'Muscle Power - Bodybuilding',
       debugShowCheckedModeBanner: false, // Hide debug banner
       
       // ========================================
@@ -138,6 +188,8 @@ class BodybuildingApp extends StatelessWidget {
         '/auth': (context) => const AuthScreen(),          // Sign in screen
         '/signup': (context) => const AuthScreen(isSignUp: true), // Sign up screen
         '/home': (context) => const MainNavigationScreen(), // Main app with tabs
+        '/performance': (context) => const PerformanceDashboardScreen(), // Performance & health
+        '/feedback': (context) => const FeedbackScreen(),  // Feedback & support
       },
     );
   }
@@ -153,6 +205,9 @@ class BodybuildingApp extends StatelessWidget {
 /// - Progress (weight & body tracking)
 /// - Nutrition (meal planning)
 /// - Profile (settings & account)
+///
+/// Also provides access to Performance Dashboard and Feedback screens
+/// via the app bar action buttons.
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -170,18 +225,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   late Animation<double> _fadeAnimation;
 
   /// List of screens for each tab
-  final List<Widget> _screens = [
-    const HomeScreen(),       // Tab 0: Dashboard
-    const WorkoutsScreen(),   // Tab 1: Workout programs
-    const ExercisesScreen(),  // Tab 2: Exercise library
-    const ProgressScreen(),   // Tab 3: Progress tracking
-    const NutritionScreen(),  // Tab 4: Nutrition/meals
-    const ProfileScreen(),    // Tab 5: User profile
-  ];
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
+    // Build screens list (needs 'this' for the callback)
+    _screens = [
+      HomeScreen(onTabSwitch: (index) => _onTabTapped(index)), // Tab 0: Dashboard
+      const WorkoutsScreen(),   // Tab 1: Workout programs
+      const ExercisesScreen(),  // Tab 2: Exercise library
+      const ProgressScreen(),   // Tab 3: Progress tracking
+      const NutritionScreen(),  // Tab 4: Nutrition/meals
+      const ProfileScreen(),    // Tab 5: User profile
+    ];
     // Initialize fade animation for smooth tab transitions
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
@@ -213,9 +270,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       // Display current tab with fade animation
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: _screens[_currentIndex],
+      // OfflineBanner shows a persistent banner when the device is offline
+      body: OfflineBanner(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          // IndexedStack keeps all tabs alive to avoid rebuilds on switch
+          child: IndexedStack(
+            index: _currentIndex,
+            children: _screens,
+          ),
+        ),
       ),
       
       // Custom styled bottom navigation bar
@@ -257,31 +321,37 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home),
               label: 'Home',
+              tooltip: 'Home dashboard',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.fitness_center_outlined),
               activeIcon: Icon(Icons.fitness_center),
               label: 'Workouts',
+              tooltip: 'Workout plans',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.sports_gymnastics_outlined),
               activeIcon: Icon(Icons.sports_gymnastics),
               label: 'Exercises',
+              tooltip: 'Exercise library',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.trending_up_outlined),
               activeIcon: Icon(Icons.trending_up),
               label: 'Progress',
+              tooltip: 'Progress tracking',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.restaurant_outlined),
               activeIcon: Icon(Icons.restaurant),
               label: 'Nutrition',
+              tooltip: 'Nutrition and meals',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               activeIcon: Icon(Icons.person),
               label: 'Profile',
+              tooltip: 'User profile and settings',
             ),
           ],
         ),

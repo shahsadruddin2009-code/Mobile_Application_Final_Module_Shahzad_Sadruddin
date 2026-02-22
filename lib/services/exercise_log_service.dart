@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Exercise Log Service
+// MUSCLE POWER - Exercise Log Service
 // ============================================================================
 //
 // File: exercise_log_service.dart

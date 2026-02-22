@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Database Service
+// MUSCLE POWER - Database Service
 // ============================================================================
 // 
 // File: database_service.dart
@@ -202,6 +202,18 @@ class DatabaseService {
         FOREIGN KEY (userId) REFERENCES users (id)
       )
     ''');
+
+    // ----------------------------------------
+    // INDICES for query performance
+    // ----------------------------------------
+    await db.execute('CREATE INDEX idx_workout_logs_userId ON workout_logs (userId)');
+    await db.execute('CREATE INDEX idx_workout_logs_date ON workout_logs (date)');
+    await db.execute('CREATE INDEX idx_exercise_logs_workoutLogId ON exercise_logs (workoutLogId)');
+    await db.execute('CREATE INDEX idx_progress_entries_userId ON progress_entries (userId)');
+    await db.execute('CREATE INDEX idx_progress_entries_date ON progress_entries (date)');
+    await db.execute('CREATE INDEX idx_meal_logs_userId ON meal_logs (userId)');
+    await db.execute('CREATE INDEX idx_meal_logs_date ON meal_logs (date)');
+    await db.execute('CREATE UNIQUE INDEX idx_user_settings_userId ON user_settings (userId)');
   }
 
   // ========================================

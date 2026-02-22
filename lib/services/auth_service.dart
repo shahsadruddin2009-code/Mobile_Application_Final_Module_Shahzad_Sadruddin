@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Authentication Service
+// MUSCLE POWER - Authentication Service
 // ============================================================================
 //
 // File: auth_service.dart
@@ -25,10 +25,12 @@
 // ============================================================================
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'dart:convert';
+import 'encryption_service.dart';
 
 /// Authentication service singleton
 ///
@@ -58,9 +60,12 @@ class AuthService {
   bool _initialized = false;
 
   /// In-memory user database
-  /// Key: email (lowercase), Value: user data including password
+  /// Key: email (lowercase), Value: user data with hashed password & encrypted fields
   /// Works on all platforms including web (no SQLite needed)
   static final Map<String, Map<String, dynamic>> _users = {};
+
+  /// Encryption service for securing sensitive data
+  final EncryptionService _encryption = EncryptionService();
 
   /// Factory constructor returns the singleton instance
   factory AuthService() => _instance;
@@ -203,24 +208,42 @@ class AuthService {
       return {'success': false, 'error': 'Email already registered'};
     }
 
-    // Create user record
+    // Generate salt and hash password (NEVER store plain text)
+    final salt = _encryption.generateSalt();
+    final hashedPassword = _encryption.hashPassword(password, salt);
+
+    // Encrypt sensitive PII fields
+    final encryptedFirstName = _encryption.encrypt(firstName.trim());
+    final encryptedLastName = _encryption.encrypt(lastName.trim());
+    final encryptedEmail = _encryption.encrypt(emailLower);
+
+    // Create user record with encrypted data
     final newId = DateTime.now().millisecondsSinceEpoch;
     final newUser = {
       'id': newId,
       'email': emailLower,
-      'password': password,
-      'firstName': firstName.trim(),
-      'lastName': lastName.trim(),
+      'emailEncrypted': encryptedEmail,
+      'password': hashedPassword,
+      'salt': salt,
+      'firstName': encryptedFirstName,
+      'lastName': encryptedLastName,
       'createdAt': DateTime.now().toIso8601String(),
       'lastLogin': DateTime.now().toIso8601String(),
+      'securityVersion': 2,
     };
 
     // Store in database
     _users[emailLower] = newUser;
 
-    // Create session (without password for security)
-    _currentUser = Map<String, dynamic>.from(newUser);
-    _currentUser!.remove('password');
+    // Create session (with decrypted names for display, no password)
+    _currentUser = {
+      'id': newId,
+      'email': emailLower,
+      'firstName': firstName.trim(),
+      'lastName': lastName.trim(),
+      'createdAt': newUser['createdAt'],
+      'lastLogin': newUser['lastLogin'],
+    };
 
     // Persist changes
     await _saveUsers();
@@ -263,17 +286,49 @@ class AuthService {
     if (user == null) {
       return {'success': false, 'error': 'No account found with this email'};
     }
-    if (user['password'] != password) {
-      return {'success': false, 'error': 'Incorrect password'};
+
+    // Verify password using hash comparison
+    final salt = user['salt'] as String?;
+    final storedHash = user['password'] as String?;
+    if (salt != null && storedHash != null && _encryption.isEncrypted(user['firstName']?.toString() ?? '')) {
+      // New encrypted format: verify via hash
+      if (!_encryption.verifyPassword(password, salt, storedHash)) {
+        return {'success': false, 'error': 'Incorrect password'};
+      }
+    } else {
+      // Legacy plain-text format: direct comparison then migrate
+      if (user['password'] != password) {
+        return {'success': false, 'error': 'Incorrect password'};
+      }
+      // Migrate to encrypted format
+      final newSalt = _encryption.generateSalt();
+      user['salt'] = newSalt;
+      user['password'] = _encryption.hashPassword(password, newSalt);
+      user['firstName'] = _encryption.encryptIfNeeded(user['firstName'] ?? '');
+      user['lastName'] = _encryption.encryptIfNeeded(user['lastName'] ?? '');
+      user['emailEncrypted'] = _encryption.encrypt(emailLower);
+      user['securityVersion'] = 2;
     }
 
     // Update last login timestamp
     user['lastLogin'] = DateTime.now().toIso8601String();
     _users[emailLower] = user;
 
-    // Create session (without password)
-    _currentUser = Map<String, dynamic>.from(user);
-    _currentUser!.remove('password');
+    // Create session (with decrypted names, no password/salt)
+    _currentUser = {
+      'id': user['id'],
+      'email': emailLower,
+      'firstName': _encryption.isEncrypted(user['firstName']?.toString() ?? '')
+          ? _encryption.decrypt(user['firstName']!)
+          : user['firstName'] ?? '',
+      'lastName': _encryption.isEncrypted(user['lastName']?.toString() ?? '')
+          ? _encryption.decrypt(user['lastName']!)
+          : user['lastName'] ?? '',
+      'createdAt': user['createdAt'],
+      'lastLogin': user['lastLogin'],
+      'provider': user['provider'],
+      'photoUrl': user['photoUrl'],
+    };
 
     await _saveUsers();
     await _saveCurrentUser();
@@ -306,10 +361,14 @@ class AuthService {
     // Also sign out from social providers
     try {
       await GoogleSignIn().signOut();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('AuthService: Google sign-out error — $e');
+    }
     try {
       await FacebookAuth.instance.logOut();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('AuthService: Facebook sign-out error — $e');
+    }
   }
 
   // ========================================
@@ -350,24 +409,46 @@ class AuthService {
         user['photoUrl'] = googleUser.photoUrl;
         _users[email] = user;
 
-        _currentUser = Map<String, dynamic>.from(user);
-        _currentUser!.remove('password');
+        _currentUser = {
+          'id': user['id'],
+          'email': email,
+          'firstName': _encryption.isEncrypted(user['firstName']?.toString() ?? '')
+              ? _encryption.decrypt(user['firstName']!)
+              : user['firstName'] ?? '',
+          'lastName': _encryption.isEncrypted(user['lastName']?.toString() ?? '')
+              ? _encryption.decrypt(user['lastName']!)
+              : user['lastName'] ?? '',
+          'provider': 'google',
+          'photoUrl': googleUser.photoUrl,
+          'lastLogin': user['lastLogin'],
+        };
       } else {
-        // Create new user
+        // Create new user with encrypted data
         final newId = DateTime.now().millisecondsSinceEpoch;
         final newUser = {
+          'id': newId,
+          'email': email,
+          'emailEncrypted': _encryption.encrypt(email),
+          'firstName': _encryption.encrypt(firstName),
+          'lastName': _encryption.encrypt(lastName),
+          'provider': 'google',
+          'photoUrl': googleUser.photoUrl,
+          'createdAt': DateTime.now().toIso8601String(),
+          'lastLogin': DateTime.now().toIso8601String(),
+          'securityVersion': 2,
+        };
+
+        _users[email] = newUser;
+        _currentUser = {
           'id': newId,
           'email': email,
           'firstName': firstName,
           'lastName': lastName,
           'provider': 'google',
           'photoUrl': googleUser.photoUrl,
-          'createdAt': DateTime.now().toIso8601String(),
-          'lastLogin': DateTime.now().toIso8601String(),
+          'createdAt': newUser['createdAt'],
+          'lastLogin': newUser['lastLogin'],
         };
-
-        _users[email] = newUser;
-        _currentUser = Map<String, dynamic>.from(newUser);
       }
 
       await _saveUsers();
@@ -404,9 +485,14 @@ class AuthService {
 
       // If email is null, try to find existing user by Apple user ID
       if (email == null) {
-        // Look for existing user with this Apple user identifier
+        // Look for existing user with this Apple user identifier (decrypt to compare)
+        final targetId = credential.userIdentifier;
         for (final entry in _users.entries) {
-          if (entry.value['appleUserId'] == credential.userIdentifier) {
+          final storedId = entry.value['appleUserId']?.toString() ?? '';
+          final decryptedId = _encryption.isEncrypted(storedId)
+              ? _encryption.decrypt(storedId)
+              : storedId;
+          if (decryptedId == targetId) {
             email = entry.key;
             break;
           }
@@ -427,27 +513,47 @@ class AuthService {
         final user = _users[email]!;
         user['lastLogin'] = DateTime.now().toIso8601String();
         user['provider'] = 'apple';
-        user['appleUserId'] = credential.userIdentifier;
+        user['appleUserId'] = _encryption.encrypt(credential.userIdentifier ?? '');
         _users[email] = user;
 
-        _currentUser = Map<String, dynamic>.from(user);
-        _currentUser!.remove('password');
+        _currentUser = {
+          'id': user['id'],
+          'email': email,
+          'firstName': _encryption.isEncrypted(user['firstName']?.toString() ?? '')
+              ? _encryption.decrypt(user['firstName']!)
+              : user['firstName'] ?? '',
+          'lastName': _encryption.isEncrypted(user['lastName']?.toString() ?? '')
+              ? _encryption.decrypt(user['lastName']!)
+              : user['lastName'] ?? '',
+          'provider': 'apple',
+          'lastLogin': user['lastLogin'],
+        };
       } else {
-        // Create new user
+        // Create new user with encrypted data
         final newId = DateTime.now().millisecondsSinceEpoch;
         final newUser = {
+          'id': newId,
+          'email': email,
+          'emailEncrypted': _encryption.encrypt(email),
+          'firstName': _encryption.encrypt(firstName.isNotEmpty ? firstName : 'Apple'),
+          'lastName': _encryption.encrypt(lastName.isNotEmpty ? lastName : 'User'),
+          'provider': 'apple',
+          'appleUserId': _encryption.encrypt(credential.userIdentifier ?? ''),
+          'createdAt': DateTime.now().toIso8601String(),
+          'lastLogin': DateTime.now().toIso8601String(),
+          'securityVersion': 2,
+        };
+
+        _users[email] = newUser;
+        _currentUser = {
           'id': newId,
           'email': email,
           'firstName': firstName.isNotEmpty ? firstName : 'Apple',
           'lastName': lastName.isNotEmpty ? lastName : 'User',
           'provider': 'apple',
-          'appleUserId': credential.userIdentifier,
-          'createdAt': DateTime.now().toIso8601String(),
-          'lastLogin': DateTime.now().toIso8601String(),
+          'createdAt': newUser['createdAt'],
+          'lastLogin': newUser['lastLogin'],
         };
-
-        _users[email] = newUser;
-        _currentUser = Map<String, dynamic>.from(newUser);
       }
 
       await _saveUsers();
@@ -511,28 +617,50 @@ class AuthService {
         user['lastLogin'] = DateTime.now().toIso8601String();
         user['provider'] = 'facebook';
         user['photoUrl'] = photoUrl;
-        user['facebookId'] = userData['id'];
+        user['facebookId'] = _encryption.encrypt(userData['id']?.toString() ?? '');
         _users[email] = user;
 
-        _currentUser = Map<String, dynamic>.from(user);
-        _currentUser!.remove('password');
+        _currentUser = {
+          'id': user['id'],
+          'email': email,
+          'firstName': _encryption.isEncrypted(user['firstName']?.toString() ?? '')
+              ? _encryption.decrypt(user['firstName']!)
+              : user['firstName'] ?? '',
+          'lastName': _encryption.isEncrypted(user['lastName']?.toString() ?? '')
+              ? _encryption.decrypt(user['lastName']!)
+              : user['lastName'] ?? '',
+          'provider': 'facebook',
+          'photoUrl': photoUrl,
+          'lastLogin': user['lastLogin'],
+        };
       } else {
-        // Create new user
+        // Create new user with encrypted data
         final newId = DateTime.now().millisecondsSinceEpoch;
         final newUser = {
+          'id': newId,
+          'email': email,
+          'emailEncrypted': _encryption.encrypt(email),
+          'firstName': _encryption.encrypt(firstName),
+          'lastName': _encryption.encrypt(lastName),
+          'provider': 'facebook',
+          'photoUrl': photoUrl,
+          'facebookId': _encryption.encrypt(userData['id']?.toString() ?? ''),
+          'createdAt': DateTime.now().toIso8601String(),
+          'lastLogin': DateTime.now().toIso8601String(),
+          'securityVersion': 2,
+        };
+
+        _users[email] = newUser;
+        _currentUser = {
           'id': newId,
           'email': email,
           'firstName': firstName,
           'lastName': lastName,
           'provider': 'facebook',
           'photoUrl': photoUrl,
-          'facebookId': userData['id'],
-          'createdAt': DateTime.now().toIso8601String(),
-          'lastLogin': DateTime.now().toIso8601String(),
+          'createdAt': newUser['createdAt'],
+          'lastLogin': newUser['lastLogin'],
         };
-
-        _users[email] = newUser;
-        _currentUser = Map<String, dynamic>.from(newUser);
       }
 
       await _saveUsers();
@@ -554,6 +682,7 @@ class AuthService {
   /// Update current user's profile data
   ///
   /// Merges provided data with existing user record.
+  /// Encrypts sensitive fields (firstName, lastName) before storing.
   /// Does not allow changing email or password through this method.
   Future<bool> updateProfile(Map<String, dynamic> data) async {
     if (_currentUser == null) return false;
@@ -562,8 +691,21 @@ class AuthService {
     final user = _users[email];
 
     if (user != null) {
-      user.addAll(data);
+      // Encrypt sensitive fields for storage
+      final encryptedData = Map<String, dynamic>.from(data);
+      if (encryptedData.containsKey('firstName')) {
+        encryptedData['firstName'] =
+            _encryption.encryptIfNeeded(encryptedData['firstName'] as String);
+      }
+      if (encryptedData.containsKey('lastName')) {
+        encryptedData['lastName'] =
+            _encryption.encryptIfNeeded(encryptedData['lastName'] as String);
+      }
+
+      user.addAll(encryptedData);
       _users[email] = user;
+
+      // Session keeps decrypted values for display
       _currentUser!.addAll(data);
 
       await _saveUsers();
@@ -610,7 +752,7 @@ class AuthService {
   /// Reset password for existing account
   ///
   /// In a real app, this would send a reset email.
-  /// For demo purposes, it directly updates the password.
+  /// For demo purposes, it directly updates the password with proper hashing.
   Future<Map<String, dynamic>> resetPassword({
     required String email,
     required String newPassword,
@@ -624,16 +766,19 @@ class AuthService {
       return {'success': false, 'error': 'No account found with this email'};
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       return {
         'success': false,
-        'error': 'Password must be at least 6 characters'
+        'error': 'Password must be at least 8 characters'
       };
     }
 
-    // Update password
-    user['password'] = newPassword;
+    // Hash the new password with a fresh salt
+    final newSalt = _encryption.generateSalt();
+    user['password'] = _encryption.hashPassword(newPassword, newSalt);
+    user['salt'] = newSalt;
     user['passwordResetAt'] = DateTime.now().toIso8601String();
+    user['securityVersion'] = 2;
     _users[emailLower] = user;
 
     await _saveUsers();

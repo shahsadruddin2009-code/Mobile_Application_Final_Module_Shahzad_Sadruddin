@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Home Screen (Dashboard)
+// MUSCLE POWER - Home Screen (Dashboard)
 // ============================================================================
 //
 // File: home_screen.dart
@@ -39,7 +39,9 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../data/data_service.dart';
 import '../widgets/gradient_card.dart';
 import '../widgets/stat_card.dart';
+import '../widgets/bodybuilder_animation.dart';
 import 'workout_detail_screen.dart';
+import 'progress_screen.dart';
 import 'package:intl/intl.dart';
 import '../services/progress_service.dart';
 import '../services/exercise_log_service.dart';
@@ -54,7 +56,11 @@ import '../services/exercise_log_service.dart';
 ///
 /// Uses [SingleTickerProviderStateMixin] for entrance animations.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  /// Optional callback to switch the parent navigation tab.
+  /// Receives the target tab index (0=Home, 1=Workouts, 2=Exercises, etc.)
+  final void Function(int tabIndex)? onTabSwitch;
+
+  const HomeScreen({super.key, this.onTabSwitch});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -139,7 +145,14 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
+        child: Stack(
+          children: [
+            // Animated bodybuilder background
+            const Positioned.fill(
+              child: BodybuilderAnimation(opacity: 0.18),
+            ),
+            // Main content
+            CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
             // App Bar
@@ -152,11 +165,14 @@ class _HomeScreenState extends State<HomeScreen>
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Welcome back,',
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            'Welcome back,',
+                            style: TextStyle(
+                              color: Colors.grey[300],
+                              fontSize: 14,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -170,25 +186,59 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ],
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
-                        ),
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFF6B35).withOpacity(0.4),
-                            blurRadius: 15,
-                            offset: const Offset(0, 5),
+                    Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF00D9FF), Color(0xFF00B4D8)],
+                            ),
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF00D9FF).withOpacity(0.4),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.notifications_outlined),
-                        color: Colors.white,
-                      ),
+                          child: IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ProgressScreen(),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.trending_up),
+                            color: Colors.white,
+                            tooltip: 'Progress Tracker',
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
+                            ),
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFF6B35).withOpacity(0.4),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            onPressed: () => _showNotificationsSheet(context),
+                            icon: const Icon(Icons.notifications_outlined),
+                            color: Colors.white,
+                            tooltip: 'Notifications',
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -398,7 +448,10 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // Switch to the Workouts tab (index 1)
+                        widget.onTabSwitch?.call(1);
+                      },
                       child: const Text(
                         'See All',
                         style: TextStyle(color: Color(0xFFFF6B35)),
@@ -591,6 +644,8 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ],
         ),
+          ],
+        ),
       ),
     );
   }
@@ -624,7 +679,7 @@ class _HomeScreenState extends State<HomeScreen>
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[400],
+            color: Colors.grey[300],
           ),
         ),
       ],
@@ -792,6 +847,194 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+  // ==========================================================================
+  // NOTIFICATIONS BOTTOM SHEET
+  // ==========================================================================
+
+  void _showNotificationsSheet(BuildContext context) {
+    final now = DateTime.now();
+    final notifications = [
+      {
+        'icon': Icons.fitness_center,
+        'color': const Color(0xFFFF6B35),
+        'title': 'Time to Train!',
+        'subtitle': 'You haven\'t logged a workout today. Stay consistent!',
+        'time': '2h ago',
+      },
+      {
+        'icon': Icons.local_fire_department,
+        'color': const Color(0xFFFF5252),
+        'title': 'Calorie Goal Reminder',
+        'subtitle': 'You\'ve burned $_totalCaloriesBurned kcal so far. Keep going!',
+        'time': '4h ago',
+      },
+      {
+        'icon': Icons.emoji_events,
+        'color': const Color(0xFFFFD740),
+        'title': 'Weekly Challenge',
+        'subtitle': 'Complete 5 workouts this week to earn a new badge.',
+        'time': '1d ago',
+      },
+      {
+        'icon': Icons.trending_up,
+        'color': const Color(0xFF00E676),
+        'title': 'Progress Update',
+        'subtitle': '$_totalWorkouts total workouts logged. Great progress!',
+        'time': '2d ago',
+      },
+      {
+        'icon': Icons.restaurant_menu,
+        'color': const Color(0xFF00D9FF),
+        'title': 'Nutrition Tip',
+        'subtitle': 'Don\'t forget to log your meals for accurate tracking.',
+        'time': '3d ago',
+      },
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A2E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      isScrollControlled: true,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.85,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[600],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Notifications',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF6B35).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${notifications.length} new',
+                          style: const TextStyle(
+                            color: Color(0xFFFF6B35),
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${now.day}/${now.month}/${now.year}',
+                    style: TextStyle(color: Colors.grey[300], fontSize: 13),
+                  ),
+                  const SizedBox(height: 20),
+                  // Notification list
+                  Expanded(
+                    child: ListView.separated(
+                      controller: scrollController,
+                      itemCount: notifications.length,
+                      separatorBuilder: (_, __) => const Divider(
+                        color: Colors.white10,
+                        height: 1,
+                      ),
+                      itemBuilder: (context, index) {
+                        final n = notifications[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: (n['color'] as Color)
+                                      .withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  n['icon'] as IconData,
+                                  color: n['color'] as Color,
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      n['title'] as String,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      n['subtitle'] as String,
+                                      style: TextStyle(
+                                        color: Colors.grey[300],
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                n['time'] as String,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showStartWorkoutDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -835,7 +1078,7 @@ class _HomeScreenState extends State<HomeScreen>
                   Text(
                     'Select a workout to start your training session',
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: Colors.grey[300],
                       fontSize: 14,
                     ),
                   ),
@@ -910,7 +1153,7 @@ class _HomeScreenState extends State<HomeScreen>
                                       Text(
                                         '${workout.muscleGroup} • ${workout.duration} • ${workout.exercises.length} exercises',
                                         style: TextStyle(
-                                          color: Colors.grey[400],
+                                          color: Colors.grey[300],
                                           fontSize: 12,
                                         ),
                                       ),
@@ -986,7 +1229,7 @@ class _HomeScreenState extends State<HomeScreen>
               Text(
                 'Track your body measurements',
                 style: TextStyle(
-                  color: Colors.grey[400],
+                  color: Colors.grey[300],
                   fontSize: 14,
                 ),
               ),
@@ -1212,7 +1455,7 @@ class _HomeScreenState extends State<HomeScreen>
                     'How many workouts do you want to complete this week?',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: Colors.grey[300],
                       fontSize: 14,
                     ),
                   ),
@@ -1261,7 +1504,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
-                                  color: isSelected ? Colors.white : Colors.grey[400],
+                                  color: isSelected ? Colors.white : Colors.grey[300],
                                 ),
                               ),
                               Text(
@@ -1304,7 +1547,7 @@ class _HomeScreenState extends State<HomeScreen>
                                             ? 'Intense schedule! You\'re serious!'
                                             : 'Beast mode! Maximum dedication! 💪',
                             style: TextStyle(
-                              color: Colors.grey[400],
+                              color: Colors.grey[300],
                               fontSize: 12,
                             ),
                           ),

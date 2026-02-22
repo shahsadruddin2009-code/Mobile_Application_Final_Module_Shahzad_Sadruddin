@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Authentication Screen
+// MUSCLE POWER - Authentication Screen
 // ============================================================================
 //
 // File: auth_screen.dart
@@ -166,11 +166,61 @@ class _AuthScreenState extends State<AuthScreen>
     _animController.forward();
   }
 
+  /// Validates email format using strict regex.
+  ///
+  /// Checks for:
+  /// - Non-empty local part before @
+  /// - Valid domain with at least one dot (e.g., domain.com)
+  /// - No consecutive dots
+  /// - Valid TLD (2+ chars)
   bool _isValidEmail(String email) {
+    if (email.isEmpty) return false;
     final emailRegex = RegExp(
-      r'^[a-zA-Z0-9.!#\$%&*+/=?^_{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$',
+      r'^[a-zA-Z0-9.!#$%&*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.(?:[a-zA-Z]{2,})(?:\.[a-zA-Z]{2,})*$',
     );
-    return emailRegex.hasMatch(email);
+    if (!emailRegex.hasMatch(email)) return false;
+    final parts = email.split('@');
+    if (parts.length != 2) return false;
+    final local = parts[0];
+    final domain = parts[1];
+    if (local.contains('..') || domain.contains('..')) return false;
+    if (local.length > 64) return false;
+    if (domain.length > 253) return false;
+    return true;
+  }
+
+  /// Returns a detailed error message for invalid emails.
+  String? _getEmailError(String email) {
+    if (email.isEmpty) return 'Email is required';
+    if (!email.contains('@')) return 'Email must contain @';
+    final parts = email.split('@');
+    if (parts.length != 2 || parts[0].isEmpty) return 'Enter text before @';
+    if (parts[1].isEmpty) return 'Enter domain after @';
+    if (!parts[1].contains('.')) return 'Domain must include a dot (e.g., gmail.com)';
+    final tld = parts[1].split('.').last;
+    if (tld.length < 2) return 'Invalid domain extension';
+    if (!_isValidEmail(email)) return 'Please enter a valid email address';
+    return null;
+  }
+
+  /// Validates password strength for sign-up.
+  ///
+  /// Requirements:
+  /// - Minimum 8 characters
+  /// - At least one uppercase letter
+  /// - At least one lowercase letter
+  /// - At least one digit
+  /// - At least one special character
+  String? _getPasswordStrengthError(String password) {
+    if (password.isEmpty) return 'Password is required';
+    final errors = <String>[];
+    if (password.length < 8) errors.add('at least 8 characters');
+    if (!RegExp(r'[A-Z]').hasMatch(password)) errors.add('an uppercase letter');
+    if (!RegExp(r'[a-z]').hasMatch(password)) errors.add('a lowercase letter');
+    if (!RegExp(r'[0-9]').hasMatch(password)) errors.add('a digit');
+    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(password)) errors.add('a special character');
+    if (errors.isEmpty) return null;
+    return 'Password needs: ${errors.join(', ')}';
   }
 
   void _showForgotPasswordDialog() {
@@ -744,11 +794,7 @@ class _AuthScreenState extends State<AuthScreen>
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
-              if (value?.isEmpty ?? true) return 'Please enter your email';
-              if (!_isValidEmail(value!)) {
-                return 'Please enter a valid email address';
-              }
-              return null;
+              return _getEmailError(value?.trim() ?? '');
             },
           ),
           const SizedBox(height: 20),
@@ -767,12 +813,41 @@ class _AuthScreenState extends State<AuthScreen>
             ),
             validator: (value) {
               if (value?.isEmpty ?? true) return 'Please enter your password';
-              if (_isSignUp && value!.length < 6) {
-                return 'Password must be at least 6 characters';
+              if (_isSignUp) {
+                return _getPasswordStrengthError(value!);
               }
               return null;
             },
           ),
+          if (_isSignUp) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Password Requirements:',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white60,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  _buildPasswordReq('At least 8 characters', _passwordController.text.length >= 8),
+                  _buildPasswordReq('Uppercase letter (A-Z)', RegExp(r'[A-Z]').hasMatch(_passwordController.text)),
+                  _buildPasswordReq('Lowercase letter (a-z)', RegExp(r'[a-z]').hasMatch(_passwordController.text)),
+                  _buildPasswordReq('A digit (0-9)', RegExp(r'[0-9]').hasMatch(_passwordController.text)),
+                  _buildPasswordReq('Special character (!@#\$...)', RegExp(r'[!@#\$%^&*(),.?":{}|<>]').hasMatch(_passwordController.text)),
+                ],
+              ),
+            ),
+          ],
           if (_isSignUp) ...[
             const SizedBox(height: 20),
             _buildTextField(
@@ -1099,6 +1174,29 @@ class _AuthScreenState extends State<AuthScreen>
         });
       }
     }
+  }
+
+  Widget _buildPasswordReq(String text, bool met) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 1),
+      child: Row(
+        children: [
+          Icon(
+            met ? Icons.check_circle : Icons.circle_outlined,
+            color: met ? const Color(0xFF27AE60) : Colors.white30,
+            size: 14,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: GoogleFonts.poppins(
+              color: met ? const Color(0xFF27AE60) : Colors.white38,
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSocialButton(

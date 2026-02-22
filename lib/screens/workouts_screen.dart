@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Workouts Screen
+// MUSCLE POWER - Workouts Screen
 // ============================================================================
 //
 // File: workouts_screen.dart
@@ -145,7 +145,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
                     'Choose your workout and start training',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[400],
+                      color: Colors.grey[300],
                     ),
                   ),
                 ],
@@ -236,7 +236,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
 
     final isCustom = _isCustomWorkout(workout);
 
-    return GestureDetector(
+    return Semantics(
+      label: '${workout.name}, ${workout.muscleGroup} workout, ${workout.difficulty}, ${workout.duration}, ${workout.exercises.length} exercises',
+      button: true,
+      child: GestureDetector(
       onTap: () {
         Navigator.push(
           context,
@@ -360,7 +363,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
                       workout.description,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[400],
+                        color: Colors.grey[300],
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -396,6 +399,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -512,7 +516,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen>
                       title: const Text('Delete Workout?', style: TextStyle(color: Colors.white)),
                       content: Text(
                         'Are you sure you want to delete "${workout.name}"?',
-                        style: TextStyle(color: Colors.grey[400]),
+                        style: TextStyle(color: Colors.grey[300]),
                       ),
                       actions: [
                         TextButton(
@@ -619,6 +623,7 @@ class _CreateWorkoutScreenState extends State<_CreateWorkoutScreen> {
         title: Text(isEditing ? 'Edit Workout' : 'Create Workout'),
         leading: IconButton(
           icon: const Icon(Icons.close),
+          tooltip: 'Close',
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -700,7 +705,7 @@ class _CreateWorkoutScreenState extends State<_CreateWorkoutScreen> {
                           child: Text(
                             group,
                             style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.grey[400],
+                              color: isSelected ? Colors.white : Colors.grey[300],
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
@@ -746,7 +751,7 @@ class _CreateWorkoutScreenState extends State<_CreateWorkoutScreen> {
                               child: Text(
                                 diff,
                                 style: TextStyle(
-                                  color: isSelected ? color : Colors.grey[400],
+                                  color: isSelected ? color : Colors.grey[300],
                                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                   fontSize: 13,
                                 ),
@@ -774,7 +779,7 @@ class _CreateWorkoutScreenState extends State<_CreateWorkoutScreen> {
                       Text(
                         '${_selectedExerciseIds.length} selected',
                         style: TextStyle(
-                          color: Colors.grey[400],
+                          color: Colors.grey[300],
                           fontSize: 14,
                         ),
                       ),
@@ -840,7 +845,7 @@ class _CreateWorkoutScreenState extends State<_CreateWorkoutScreen> {
                                   Text(
                                     '${exercise.sets} sets × ${exercise.reps} reps • ${exercise.muscleGroup}',
                                     style: TextStyle(
-                                      color: Colors.grey[400],
+                                      color: Colors.grey[300],
                                       fontSize: 12,
                                     ),
                                   ),
@@ -981,7 +986,7 @@ class _CreateWorkoutScreenState extends State<_CreateWorkoutScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[400],
+            color: Colors.grey[300],
             fontSize: 12,
           ),
         ),

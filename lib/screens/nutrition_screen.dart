@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Nutrition Screen
+// MUSCLE POWER - Nutrition Screen
 // ============================================================================
 //
 // File: nutrition_screen.dart
@@ -141,7 +141,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                       Text(
                         'Fuel your gains 🥗',
                         style: TextStyle(
-                          color: Colors.grey,
+                          color: Color(0xFFB0B0B0),
                           fontSize: 14,
                         ),
                       ),
@@ -158,6 +158,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                       onPressed: () => _showLogMealDialog(context),
                       icon: const Icon(Icons.add),
                       color: Colors.white,
+                      tooltip: 'Log a meal',
                     ),
                   ),
                 ],
@@ -180,7 +181,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                   borderRadius: BorderRadius.circular(15),
                 ),
                 labelColor: Colors.white,
-                unselectedLabelColor: Colors.grey,
+                unselectedLabelColor: const Color(0xFFB0B0B0),
                 tabs: const [
                   Tab(text: 'Today'),
                   Tab(text: 'Meal Plans'),
@@ -401,7 +402,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                   Text(
                     'No meals logged today',
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: Colors.grey[300],
                       fontSize: 16,
                     ),
                   ),
@@ -468,7 +469,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                     child: Text(
                       type,
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.grey[400],
+                        color: isSelected ? Colors.white : Colors.grey[300],
                         fontWeight:
                             isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
@@ -531,7 +532,7 @@ class _NutritionScreenState extends State<NutritionScreen>
           Text(
             name,
             style: TextStyle(
-              color: Colors.grey[400],
+              color: Colors.grey[300],
               fontSize: 12,
             ),
           ),
@@ -608,7 +609,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                     Text(
                       '$currentWater of $targetWater glasses',
                       style: TextStyle(
-                        color: Colors.grey[400],
+                        color: Colors.grey[300],
                         fontSize: 12,
                       ),
                     ),
@@ -708,7 +709,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                 icon: const Icon(Icons.remove, size: 16),
                 label: const Text('Remove'),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.grey[400],
+                  foregroundColor: Colors.grey[300],
                 ),
               ),
               // Set goal button
@@ -765,7 +766,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                   Text(
                     'Set your daily water intake goal',
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: Colors.grey[300],
                       fontSize: 14,
                     ),
                   ),
@@ -816,7 +817,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                   Text(
                     '≈ ${selectedGoal * 250}ml',
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: Colors.grey[300],
                       fontSize: 14,
                     ),
                   ),
@@ -934,7 +935,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                         ? meal.mealType[0].toUpperCase() + meal.mealType.substring(1)
                         : 'Meal',
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: Colors.grey[300],
                       fontSize: 12,
                     ),
                   ),
@@ -1094,7 +1095,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                       Text(
                         meal.prepTime,
                         style: TextStyle(
-                          color: Colors.grey[400],
+                          color: Colors.grey[300],
                           fontSize: 12,
                         ),
                       ),
@@ -1371,7 +1372,7 @@ class _NutritionScreenState extends State<NutritionScreen>
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[400],
+            color: Colors.grey[300],
             fontSize: 12,
           ),
         ),
@@ -1432,7 +1433,7 @@ class _NutritionScreenState extends State<NutritionScreen>
                     Text(
                       'Track your nutrition intake',
                       style: TextStyle(
-                        color: Colors.grey[400],
+                        color: Colors.grey[300],
                         fontSize: 14,
                       ),
                     ),
@@ -1477,13 +1478,13 @@ class _NutritionScreenState extends State<NutritionScreen>
                                 Icon(
                                   _getMealTypeIcon(type),
                                   size: 16,
-                                  color: isSelected ? Colors.white : Colors.grey[400],
+                                  color: isSelected ? Colors.white : Colors.grey[300],
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   type,
                                   style: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.grey[400],
+                                    color: isSelected ? Colors.white : Colors.grey[300],
                                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                   ),
                                 ),

@@ -1,5 +1,5 @@
 // ============================================================================
-// IRON FORGE - Data Service (Sample Data Provider)
+// MUSCLE POWER - Data Service (Sample Data Provider)
 // ============================================================================
 // 
 // File: data_service.dart
@@ -21,7 +21,7 @@
 // - User Profile: Demo user profile data
 // 
 // Muscle Groups Covered:
-// - Chest (5 exercises)
+// - Chest (6 exercises)
 // - Back (5 exercises)
 // - Shoulders (4 exercises)
 // - Arms (5 exercises)
@@ -58,7 +58,7 @@ class DataService {
   static List<Exercise> getExercises() {
     return [
       // ----------------------------------------
-      // CHEST EXERCISES (5 exercises)
+      // CHEST EXERCISES (6 exercises)
       // Primary: Pectoralis Major/Minor
       // Secondary: Anterior Deltoid, Triceps
       // ----------------------------------------
@@ -147,6 +147,25 @@ class DataService {
           'Control the negative'
         ],
         equipment: 'Dip Bars',
+      ),
+      Exercise(
+        id: 'chest_6',
+        name: 'Incline Cable Fly',
+        muscleGroup: 'Chest',
+        description: 'An isolation exercise performed on an incline bench using a cable machine. Targets the upper chest with constant tension throughout the range of motion.',
+        imageUrl: 'assets/exercises/incline_cable_fly.png',
+        sets: 3,
+        reps: 12,
+        restTime: '60 sec',
+        difficulty: 'Intermediate',
+        tips: [
+          'Set the bench to a 30-45 degree incline',
+          'Keep a slight bend in your elbows throughout',
+          'Bring hands together above your upper chest',
+          'Control the stretch at the bottom, squeeze at the top',
+          'Use low cable pulleys for proper line of resistance'
+        ],
+        equipment: 'Cable Machine, Incline Bench',
       ),
 
       // ----------------------------------------
