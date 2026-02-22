@@ -4,16 +4,16 @@
 
 | Metric                | Value       |
 |-----------------------|-------------|
-| **Total Tests**       | 616         |
-| **Passed**            | 616         |
+| **Total Tests**       | 653         |
+| **Passed**            | 653         |
 | **Failed**            | 0           |
 | **Pass Rate**         | 100%        |
-| **Test Files**        | 23          |
+| **Test Files**        | 27          |
 | **Test Groups**       | 110+        |
-| **Total Test LOC**    | 9,200       |
-| **Total Source LOC**  | 23,980      |
-| **Test-to-Code Ratio**| 0.38:1     |
-| **Execution Time**    | ~30 seconds |
+| **Total Test LOC**    | 7,992       |
+| **Total Source LOC**  | 30,514      |
+| **Test-to-Code Ratio**| 0.26:1     |
+| **Execution Time**    | ~36 seconds |
 
 ---
 
@@ -31,9 +31,9 @@
 | 6 | `test/services/custom_workout_service_test.dart` | 24 | 2 | 324 | PASS |
 | 7 | `test/data/data_service_test.dart`      |    41 |      7 | 374 |   PASS |
 | 8 | `test/screens/test_statistics_screen_test.dart` | 89 | 10 | 676 | PASS |
-| 9 | `test/services/feedback_service_test.dart` |  42 |  10 | 380 |   PASS |
-|10 | `test/services/performance_service_test.dart` | 38 | 9 | 310 |  PASS |
-|11 | `test/services/health_dashboard_service_test.dart` | 45 | 11 | 370 | PASS |
+| 9 | `test/services/feedback_service_test.dart` |  42 |  10 | 385 |   PASS |
+|10 | `test/services/performance_service_test.dart` | 38 | 9 | 262 |  PASS |
+|11 | `test/services/health_dashboard_service_test.dart` | 45 | 11 | 340 | PASS |
 
 ### Widget / Screen Tests (8 files — 166 tests)
 
@@ -44,24 +44,24 @@
 | 3 | `test/screens/auth_screen_test.dart`    |    19 |      5 | 184 |   PASS |
 | 4 | `test/screens/landing_screen_test.dart` |     9 |      1 |  82 |   PASS |
 | 5 | `test/screens/main_navigation_test.dart`|    15 |      2 | 163 |   PASS |
-| 6 | `test/widgets/responsive_helper_test.dart` | 28 |   7 | 290 |   PASS |
-| 7 | `test/widgets/exercise_illustration_test.dart` | 22 | 4 | 195 | PASS |
-| 8 | `test/widgets/bodybuilder_animation_test.dart` | 12 | 3 | 155 | PASS |
+| 6 | `test/widgets/responsive_helper_test.dart` | 28 |   7 | 265 |   PASS |
+| 7 | `test/widgets/exercise_illustration_test.dart` | 22 | 4 | 196 | PASS |
+| 8 | `test/widgets/bodybuilder_animation_test.dart` | 12 | 3 | 142 | PASS |
 
 ### Additional Service Tests (4 files — 42 tests)
 
 | # | Test File                                        | Tests | Groups | LOC | Status |
 |---|--------------------------------------------------|-------|--------|-----|--------|
-| 1 | `test/services/api_client_test.dart`              |    12 |      5 | 166 |   PASS |
-| 2 | `test/services/cache_manager_test.dart`            |    10 |      5 | 127 |   PASS |
-| 3 | `test/services/connectivity_service_test.dart`     |     5 |      3 |  55 |   PASS |
-| 4 | `test/services/data_lifecycle_service_test.dart`   |    15 |      5 | 172 |   PASS |
+| 1 | `test/services/api_client_test.dart`              |    12 |      5 | 139 |   PASS |
+| 2 | `test/services/cache_manager_test.dart`            |    10 |      5 | 110 |   PASS |
+| 3 | `test/services/connectivity_service_test.dart`     |     5 |      3 |  42 |   PASS |
+| 4 | `test/services/data_lifecycle_service_test.dart`   |    15 |      5 | 145 |   PASS |
 
 ### Other Widget Tests (1 file — 10 tests)
 
 | # | Test File                              | Tests | Groups | LOC | Status |
 |---|----------------------------------------|-------|--------|-----|--------|
-| 1 | `test/widgets/offline_banner_test.dart` |    10 |      5 | 140 |   PASS |
+| 1 | `test/widgets/offline_banner_test.dart` |    10 |      5 | 146 |   PASS |
 
 ### Integration Tests (2 files — 43 tests)
 
@@ -80,34 +80,47 @@
 
 ## Code Coverage Profile
 
-**Overall Coverage: 3,302 / 10,485 executable lines (31.5%)**
+**Overall Coverage: 6,801 / 13,071 executable lines (52.0%)**
 
 ### Per-File Coverage
 
 | Source File                           | Lines Hit | Lines Found | Coverage |
 |---------------------------------------|-----------|-------------|----------|
-| `lib/data/data_service.dart`          |       141 |         141 |  100.0%  |
+| `lib/data/data_service.dart`          |       143 |         143 |  100.0%  |
 | `lib/models/models.dart`              |         9 |           9 |  100.0%  |
 | `lib/services/encryption_service.dart`|        91 |          91 |  100.0%  |
+| `lib/widgets/bodybuilder_animation.dart`|     490 |         490 |  100.0%  |
+| `lib/widgets/responsive_helper.dart`  |        29 |          29 |  100.0%  |
 | `lib/screens/test_statistics_screen.dart`|     445 |         446 |   99.8%  |
 | `lib/services/custom_workout_service.dart` |  92 |          93 |   98.9%  |
 | `lib/screens/landing_screen.dart`     |       121 |         123 |   98.4%  |
-| `lib/services/nutrition_service.dart`  |      103 |         105 |   98.1%  |
-| `lib/widgets/stat_card.dart`          |        92 |          95 |   96.8%  |
-| `lib/widgets/bodybuilder_animation.dart`|     472 |         490 |   96.3%  |
+| `lib/services/nutrition_service.dart`  |      102 |         105 |   97.1%  |
+| `lib/widgets/stat_card.dart`          |        94 |          97 |   96.9%  |
 | `lib/widgets/gradient_card.dart`      |       115 |         121 |   95.0%  |
 | `lib/services/progress_service.dart`  |       171 |         188 |   91.0%  |
 | `lib/services/exercise_log_service.dart`|     106 |         118 |   89.8%  |
-| `lib/screens/exercises_screen.dart`   |       134 |         159 |   84.3%  |
-| `lib/main.dart`                       |        52 |          63 |   82.5%  |
-| `lib/screens/home_screen.dart`        |       238 |         512 |   46.5%  |
+| `lib/services/data_lifecycle_service.dart`|    97 |         110 |   88.2%  |
+| `lib/screens/exercises_screen.dart`   |       140 |         165 |   84.8%  |
+| `lib/services/feedback_service.dart`  |       231 |         299 |   77.3%  |
+| `lib/services/cache_manager.dart`     |        74 |          99 |   74.7%  |
+| `lib/widgets/offline_banner.dart`     |        23 |          31 |   74.2%  |
+| `lib/services/health_dashboard_service.dart`| 211 |         304 |   69.4%  |
+| `lib/services/performance_service.dart`|     152 |         237 |   64.1%  |
+| `lib/main.dart`                       |        55 |          88 |   62.5%  |
+| `lib/widgets/exercise_illustration.dart`|   2,439 |       4,440 |   54.9%  |
+| `lib/screens/profile_screen.dart`     |       201 |         407 |   49.4%  |
+| `lib/screens/home_screen.dart`        |       239 |         513 |   46.6%  |
+| `lib/services/api_client.dart`        |        48 |         111 |   43.2%  |
 | `lib/screens/auth_screen.dart`        |       212 |         493 |   43.0%  |
+| `lib/services/connectivity_service.dart`|      11 |          26 |   42.3%  |
 | `lib/screens/progress_screen.dart`    |       303 |         724 |   41.9%  |
-| `lib/screens/workouts_screen.dart`    |       127 |         369 |   34.4%  |
+| `lib/screens/workouts_screen.dart`    |       129 |         371 |   34.8%  |
 | `lib/screens/nutrition_screen.dart`   |       198 |         586 |   33.8%  |
-| `lib/screens/profile_screen.dart`     |        24 |         397 |    6.0%  |
-| `lib/services/auth_service.dart`      |        12 |         321 |    3.7%  |
-| `lib/widgets/exercise_illustration.dart`|      44 |       4,160 |    1.1%  |
+| `lib/services/auth_service.dart`      |        27 |         323 |    8.4%  |
+| `lib/screens/privacy_screen.dart`     |         1 |         135 |    0.7%  |
+| `lib/screens/performance_dashboard_screen.dart`| 1 |       347 |    0.3%  |
+| `lib/screens/feedback_screen.dart`    |         1 |         504 |    0.2%  |
+| `lib/services/app_lifecycle_observer.dart`|     0 |          24 |    0.0%  |
 | `lib/screens/exercise_detail_screen.dart`|      0 |         368 |    0.0%  |
 | `lib/screens/workout_detail_screen.dart`|       0 |         313 |    0.0%  |
 
@@ -116,11 +129,11 @@
 | Layer               | Lines Hit | Lines Found | Coverage |
 |---------------------|-----------|-------------|----------|
 | **Models**          |         9 |           9 |  100.0%  |
-| **Data**            |       141 |         141 |  100.0%  |
-| **Services**        |       575 |         916 |   62.8%  |
-| **Widgets**         |       723 |       4,866 |   14.9%  |
-| **Screens**         |     1,802 |       4,491 |   40.1%  |
-| **App (main.dart)** |        52 |          63 |   82.5%  |
+| **Data**            |       143 |         143 |  100.0%  |
+| **Services**        |     1,413 |       2,104 |   67.2%  |
+| **Widgets**         |     3,190 |       5,208 |   61.3%  |
+| **Screens**         |     1,991 |       5,495 |   36.2%  |
+| **App (main.dart)** |        55 |          88 |   62.5%  |
 
 ---
 
@@ -331,8 +344,10 @@
 | Component                    | Tests | Lines | Status     |
 |------------------------------|-------|-------|------------|
 | `models.dart`                |    21 |     9 | 100% |
-| `data_service.dart`          |    41 |   141 | 100% |
+| `data_service.dart`          |    41 |   143 | 100% |
 | `encryption_service.dart`    |    49 |    91 | 100% |
+| `bodybuilder_animation.dart` |    12 |   490 | 100% |
+| `responsive_helper.dart`     |    28 |    29 | 100% |
 
 ## Near-Full Coverage (>95%)
 
@@ -341,14 +356,13 @@
 | `test_statistics_screen.dart`|    89 |   446 | 99.8% |
 | `custom_workout_service.dart`|    24 |    93 | 98.9% |
 | `landing_screen.dart`        |     9 |   123 | 98.4% |
-| `nutrition_service.dart`     |    24 |   105 | 98.1% |
-| `stat_card.dart`             |    23 |    95 | 96.8% |
-| `bodybuilder_animation.dart` |     — |   490 | 96.3% |
+| `nutrition_service.dart`     |    24 |   105 | 97.1% |
+| `stat_card.dart`             |    23 |    97 | 96.9% |
 | `gradient_card.dart`         |    28 |   121 | 95.0% |
 
 ---
 
-*Generated: February 18, 2026*
-*Framework: Flutter Test + flutter_test SDK*
+*Generated: February 21, 2026*
+*Framework: Flutter 3.38.5 + flutter_test SDK*
 *Runner: `flutter test --coverage`*
-*All 616 tests passed — 0 failures*
+*All 653 tests passed — 0 failures*

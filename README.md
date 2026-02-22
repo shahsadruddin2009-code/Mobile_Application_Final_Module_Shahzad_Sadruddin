@@ -2,11 +2,11 @@
 
 A comprehensive Flutter-based bodybuilding and fitness tracking application designed to help users achieve their fitness goals through structured workouts, nutrition tracking, and progress monitoring.
 
-![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?logo=flutter)
-![Dart](https://img.shields.io/badge/Dart-3.0+-0175C2?logo=dart)
+![Flutter](https://img.shields.io/badge/Flutter-3.38.5-02569B?logo=flutter)
+![Dart](https://img.shields.io/badge/Dart-3.10.4-0175C2?logo=dart)
 ![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android%20%7C%20Web%20%7C%20Windows-green)
-![Tests](https://img.shields.io/badge/Tests-616%20Passing-brightgreen)
-![Coverage](https://img.shields.io/badge/Coverage-45%25-yellow)
+![Tests](https://img.shields.io/badge/Tests-653%20Passing-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-52%25-yellow)
 ![Version](https://img.shields.io/badge/Version-1.1.0-orange)
 
 ---
@@ -69,8 +69,8 @@ The app features a modern dark theme with orange and cyan accent colors, providi
 
 | Category | Technology |
 |----------|------------|
-| **Framework** | Flutter 3.0+ |
-| **Language** | Dart 3.0+ |
+| **Framework** | Flutter 3.38.5 |
+| **Language** | Dart 3.10.4 |
 | **State Management** | StatefulWidget with Services |
 | **Local Database** | SQLite (sqflite) |
 | **Preferences** | SharedPreferences |
@@ -169,8 +169,8 @@ test/
 
 ### Prerequisites
 
-- Flutter SDK 3.0 or higher
-- Dart SDK 3.0 or higher
+- Flutter SDK 3.38.5 or higher
+- Dart SDK 3.10.4 or higher
 - Android Studio / VS Code with Flutter extensions
 - (Optional) Xcode for iOS development
 
@@ -216,22 +216,23 @@ test/
 
 | Metric                | Value        |
 |-----------------------|--------------|
-| **Total Tests**       | 616          |
-| **Passed**            | 616          |
+| **Total Tests**       | 653          |
+| **Passed**            | 653          |
 | **Failed**            | 0            |
 | **Pass Rate**         | 100%         |
-| **Test Files**        | 23           |
+| **Test Files**        | 27           |
 | **Test Groups**       | 110+         |
-| **Total Test LOC**    | ~9,200       |
-| **Execution Time**    | ~30 seconds  |
+| **Total Test LOC**    | ~7,992       |
+| **Execution Time**    | ~36 seconds  |
 
 ### Test Categories
 
 | Category             | Files | Tests | Description                                    |
 |----------------------|------:|------:|------------------------------------------------|
-| **Unit Tests**       |    10 |   351 | Models, services, encryption, data layer, feedback, perf, health |
-| **Widget Tests**     |     9 |   255 | Screen rendering, widget behavior, responsiveness, animations    |
+| **Unit Tests**       |    11 |   398 | Models, services, encryption, data layer, feedback, perf, health |
+| **Widget Tests**     |     8 |   166 | Screen rendering, widget behavior, responsiveness, animations    |
 | **Integration Tests**|     2 |    43 | Cross-service flows, full app navigation       |
+| **Additional Service**|    4 |    42 | API client, cache, connectivity, data lifecycle |
 | **Legacy Tests**     |     1 |     7 | Original widget test scaffold                  |
 
 ### Running Tests
@@ -255,27 +256,30 @@ flutter test --name "Encryption"
 
 ### Code Coverage Overview
 
-**Overall: ~4,700 / 10,485 executable lines (~45%)**
+**Overall: 6,801 / 13,071 executable lines (52%)**
 
 | Layer           | Coverage | Status |
 |-----------------|----------|--------|
 | Models          | 100.0%   | ✅ Full |
 | Data            | 100.0%   | ✅ Full |
-| Services        | 78.5%    | 🟢 High |
-| App (main.dart) | 82.5%    | 🟢 High |
-| Screens         | 40.1%    | 🟡 Partial |
-| Widgets         | 52.3%    | 🟡 Partial |
+| Services        | 67.2%    | 🟢 High |
+| App (main.dart) | 62.5%    | 🟢 High |
+| Widgets         | 61.3%    | 🟢 High |
+| Screens         | 36.2%    | 🟡 Partial |
 
 #### Fully Covered Files (100%)
 - `models.dart` — 21 tests, 9/9 lines
-- `data_service.dart` — 41 tests, 141/141 lines
+- `data_service.dart` — 41 tests, 143/143 lines
 - `encryption_service.dart` — 49 tests, 91/91 lines
+- `bodybuilder_animation.dart` — 12 tests, 490/490 lines
+- `responsive_helper.dart` — 28 tests, 29/29 lines
 
 #### Near-Full Coverage (>95%)
+- `test_statistics_screen.dart` — 99.8%
 - `custom_workout_service.dart` — 98.9%
 - `landing_screen.dart` — 98.4%
-- `nutrition_service.dart` — 98.1%
-- `stat_card.dart` — 96.8%
+- `nutrition_service.dart` — 97.1%
+- `stat_card.dart` — 96.9%
 - `gradient_card.dart` — 95.0%
 
 > For the complete test statistics breakdown, see [`test/TEST_STATISTICS_PROFILE.md`](test/TEST_STATISTICS_PROFILE.md) or launch the in-app **Test Statistics Dashboard** from the profile screen.
@@ -396,7 +400,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Mobile Application Development - Final Module Assessment
 
-*Last Updated: February 18, 2026*
+*Last Updated: February 21, 2026*
 
 ---
 
