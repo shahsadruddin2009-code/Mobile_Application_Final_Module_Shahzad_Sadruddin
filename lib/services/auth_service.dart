@@ -360,7 +360,7 @@ class AuthService {
 
     // Also sign out from social providers
     try {
-      await GoogleSignIn().signOut();
+      await GoogleSignIn.instance.signOut();
     } catch (e) {
       debugPrint('AuthService: Google sign-out error — $e');
     }
@@ -383,15 +383,12 @@ class AuthService {
     await init();
 
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
+      final googleSignIn = GoogleSignIn.instance;
+      await googleSignIn.initialize();
+
+      final GoogleSignInAccount googleUser = await googleSignIn.authenticate(
+        scopeHint: ['email', 'profile'],
       );
-
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-
-      if (googleUser == null) {
-        return {'success': false, 'error': 'Google sign-in was cancelled'};
-      }
 
       final email = googleUser.email.toLowerCase().trim();
       final displayName = googleUser.displayName ?? '';
